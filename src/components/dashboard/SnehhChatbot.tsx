@@ -167,13 +167,17 @@ const SnehhChatbot = () => {
         aria-label="Chat with Snehh"
       >
         <div className="relative">
-          <div className="w-16 h-16 rounded-full bg-gradient-hero flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            {isOpen ? (
+          {isOpen ? (
+            <div className="w-16 h-16 rounded-full bg-gradient-hero flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               <X className="w-7 h-7 text-primary-foreground" />
-            ) : (
-              <MessageCircle className="w-7 h-7 text-primary-foreground" />
-            )}
-          </div>
+            </div>
+          ) : (
+            <img 
+              src={snehhAvatar} 
+              alt="Snehh" 
+              className="w-16 h-16 rounded-full object-cover shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ring-2 ring-nyay-gold/50" 
+            />
+          )}
           {!isOpen && (
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-nyay-gold rounded-full animate-pulse-glow" />
           )}
