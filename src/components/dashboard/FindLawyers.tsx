@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MapPin, ChevronRight, Star, Phone, Clock, Languages, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,17 +8,32 @@ import { toast } from "sonner";
 import { indianStates, citiesByState, caseTypes } from "@/data/caseTypes";
 import { getLawyersFiltered, Lawyer } from "@/data/lawyers";
 
-const FindLawyers = () => {
+interface FindLawyersProps {
+  prefillCaseType?: string;
+  onClear?: () => void;
+}
+
+const FindLawyers = ({ prefillCaseType, onClear }: FindLawyersProps) => {
   const [step, setStep] = useState<"select" | "results" | "profile">(
     "select"
   );
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const [selectedCaseType, setSelectedCaseType] = useState("");
+  const [selectedCaseType, setSelectedCaseType] = useState(prefillCaseType || "");
   const [lawyers, setLawyers] = useState<Lawyer[]>([]);
   const [selectedLawyer, setSelectedLawyer] = useState<Lawyer | null>(null);
 
+  useEffect(() => {
+    if (prefillCaseType) {
+      setSelectedCaseType(prefillCaseType);
+    }
+  }, [prefillCaseType]);
+
   const handleSearch = () => {
+    if (!selectedState) {
+      toast.error("Please select a state");
+      return;
+    }
     if (!selectedCaseType) {
       toast.error("Please select a case type");
       return;
@@ -204,12 +219,23 @@ const FindLawyers = () => {
           </div>
           <CardTitle>Find Lawyers Near You</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Select your location and case type to find specialized lawyers
+            {prefillCaseType 
+              ? `Select your location to find ${prefillCaseType} lawyers nearby`
+              : "Select your location and case type to find specialized lawyers"
+            }
           </p>
         </CardHeader>
         <CardContent className="space-y-5">
+          {prefillCaseType && (
+            <div className="p-3 rounded-xl bg-nyay-teal/10 border border-nyay-teal/20">
+              <p className="text-sm text-nyay-teal font-medium">
+                Case Type: {prefillCaseType} (detected by NyayScan)
+              </p>
+            </div>
+          )}
+
           <div className="space-y-2">
-            <Label>State</Label>
+            <Label>State *</Label>
             <Select value={selectedState} onValueChange={(v) => { setSelectedState(v); setSelectedCity(""); }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select State (optional)" />
@@ -241,19 +267,21 @@ const FindLawyers = () => {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Type of Case *</Label>
-            <Select value={selectedCaseType} onValueChange={setSelectedCaseType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Case Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {caseTypes.map((type) => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!prefillCaseType && (
+            <div className="space-y-2">
+              <Label>Type of Case *</Label>
+              <Select value={selectedCaseType} onValueChange={setSelectedCaseType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Case Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {caseTypes.map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <Button variant="gold" size="lg" className="w-full" onClick={handleSearch}>
             Find Lawyers
