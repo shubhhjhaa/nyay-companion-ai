@@ -285,7 +285,7 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
           sender_id: currentUserId,
           receiver_id: receiverId,
           case_type: caseType,
-          status: 'sent'
+          status: 'pending'
         });
 
       if (error) throw error;
