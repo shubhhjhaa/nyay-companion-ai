@@ -1,19 +1,41 @@
 import { useState, useEffect } from "react";
-import { MapPin, ChevronRight, Star, Phone, Clock, Languages, BadgeCheck, Heart, MessageCircle } from "lucide-react";
+import { MapPin, ChevronRight, Star, Phone, Clock, Languages, BadgeCheck, Heart, MessageCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { indianStates, citiesByState, caseTypes } from "@/data/caseTypes";
-import { getLawyersFiltered, Lawyer } from "@/data/lawyers";
+import { dummyLawyers, Lawyer as DummyLawyer } from "@/data/lawyers";
 import { supabase } from "@/integrations/supabase/client";
+
+interface Lawyer {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  specialization: string;
+  experience: number;
+  languages: string[];
+  barCouncilId: string;
+  availability: string;
+  rating: number;
+  casesWon: number;
+  profileImage: string;
+  isReal?: boolean;
+}
 
 interface FindLawyersProps {
   prefillCaseType?: string;
   onClear?: () => void;
   onConnectLawyer?: (lawyerId: string, caseType: string, caseId: string) => void;
 }
+
+const getAvatarUrl = (name: string) => {
+  const bgColors = ['0D9488', '6366F1', 'D97706', 'DC2626', '7C3AED', '059669'];
+  const randomColor = bgColors[Math.abs(name.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % bgColors.length];
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${randomColor}&color=fff&size=200&bold=true`;
+};
 
 const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersProps) => {
   const [step, setStep] = useState<"select" | "results" | "profile">("select");
@@ -24,6 +46,7 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
   const [selectedLawyer, setSelectedLawyer] = useState<Lawyer | null>(null);
   const [savedLawyerIds, setSavedLawyerIds] = useState<Set<string>>(new Set());
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (prefillCaseType) {
@@ -50,7 +73,49 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
     }
   };
 
-  const handleSearch = () => {
+  const fetchRealLawyers = async (caseType: string, state?: string, city?: string): Promise<Lawyer[]> => {
+    try {
+      let query = supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_type', 'lawyer');
+
+      if (caseType) {
+        query = query.ilike('practice_area', `%${caseType}%`);
+      }
+      if (state) {
+        query = query.ilike('state', `%${state}%`);
+      }
+      if (city) {
+        query = query.ilike('city', `%${city}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return (data || []).map(profile => ({
+        id: profile.id,
+        name: profile.full_name ? `Adv. ${profile.full_name}` : 'Unknown Lawyer',
+        city: profile.city || 'Not specified',
+        state: profile.state || 'Not specified',
+        specialization: profile.practice_area || 'General Practice',
+        experience: profile.experience || 0,
+        languages: ['English', 'Hindi'],
+        barCouncilId: profile.bar_council_id || 'Not registered',
+        availability: 'Mon-Fri, 10 AM - 6 PM',
+        rating: 4.5,
+        casesWon: Math.floor(Math.random() * 100) + 50,
+        profileImage: getAvatarUrl(profile.full_name || 'Lawyer'),
+        isReal: true
+      }));
+    } catch (error) {
+      console.error('Error fetching real lawyers:', error);
+      return [];
+    }
+  };
+
+  const handleSearch = async () => {
     if (!selectedState) {
       toast.error("Please select a state");
       return;
@@ -60,22 +125,59 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
       return;
     }
 
-    const filtered = getLawyersFiltered(
-      selectedCaseType,
-      selectedState || undefined,
-      selectedCity || undefined
-    );
+    setIsSearching(true);
 
-    if (filtered.length === 0) {
-      const byType = getLawyersFiltered(selectedCaseType);
-      setLawyers(byType);
-      if (byType.length > 0) {
-        toast.info(`Showing ${selectedCaseType} lawyers from all locations`);
+    try {
+      // Fetch real lawyers from database
+      const realLawyers = await fetchRealLawyers(
+        selectedCaseType,
+        selectedState,
+        selectedCity || undefined
+      );
+
+      // Filter dummy lawyers
+      const filteredDummy = dummyLawyers.filter((lawyer) => {
+        let match = true;
+        if (selectedCaseType) {
+          match = match && lawyer.specialization.toLowerCase() === selectedCaseType.toLowerCase();
+        }
+        if (selectedState) {
+          match = match && lawyer.state.toLowerCase() === selectedState.toLowerCase();
+        }
+        if (selectedCity) {
+          match = match && lawyer.city.toLowerCase() === selectedCity.toLowerCase();
+        }
+        return match;
+      }).map(l => ({ ...l, isReal: false }));
+
+      // Combine real lawyers first, then dummy
+      const combinedLawyers = [...realLawyers, ...filteredDummy];
+
+      if (combinedLawyers.length === 0) {
+        // Show lawyers by type only
+        const byTypeDummy = dummyLawyers.filter(l => 
+          l.specialization.toLowerCase() === selectedCaseType.toLowerCase()
+        ).map(l => ({ ...l, isReal: false }));
+        
+        const byTypeReal = await fetchRealLawyers(selectedCaseType);
+        
+        setLawyers([...byTypeReal, ...byTypeDummy]);
+        if (byTypeReal.length + byTypeDummy.length > 0) {
+          toast.info(`Showing ${selectedCaseType} lawyers from all locations`);
+        }
+      } else {
+        setLawyers(combinedLawyers);
+        if (realLawyers.length > 0) {
+          toast.success(`Found ${realLawyers.length} verified lawyer(s) in your area`);
+        }
       }
-    } else {
-      setLawyers(filtered);
+      setStep("results");
+    } catch (error) {
+      console.error('Search error:', error);
+      toast.error('Failed to search lawyers');
+    } finally {
+      setIsSearching(false);
     }
-    setStep("results");
   };
 
   const handleSaveLawyer = async (lawyer: Lawyer, e?: React.MouseEvent) => {
@@ -89,7 +191,6 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
       }
 
       if (savedLawyerIds.has(lawyer.id)) {
-        // Unsave
         const { error } = await supabase
           .from('saved_lawyers')
           .delete()
@@ -105,7 +206,6 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
         });
         toast.success(`Removed ${lawyer.name} from saved lawyers`);
       } else {
-        // Save
         const { error } = await supabase
           .from('saved_lawyers')
           .insert({
@@ -151,6 +251,17 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
 
       if (caseError) throw caseError;
 
+      // Send notification to lawyer if they're a real lawyer
+      if (lawyer.isReal) {
+        await supabase.from('notifications').insert({
+          user_id: lawyer.id,
+          title: 'New Case Request',
+          message: `You have a new ${selectedCaseType || 'consultation'} case request`,
+          type: 'case_request',
+          case_id: newCase.id
+        });
+      }
+
       toast.success(`Connected with ${lawyer.name}!`);
       
       if (onConnectLawyer && newCase) {
@@ -176,11 +287,18 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
         <Card className="shadow-card">
           <CardContent className="p-8">
             <div className="flex items-start gap-6 mb-6">
-              <img 
-                src={selectedLawyer.profileImage} 
-                alt={selectedLawyer.name}
-                className="w-24 h-24 rounded-2xl object-cover shadow-md"
-              />
+              <div className="relative">
+                <img 
+                  src={selectedLawyer.profileImage} 
+                  alt={selectedLawyer.name}
+                  className="w-24 h-24 rounded-2xl object-cover shadow-md"
+                />
+                {selectedLawyer.isReal && (
+                  <div className="absolute -top-2 -right-2 bg-nyay-teal text-primary-foreground text-xs px-2 py-0.5 rounded-full font-medium">
+                    Verified
+                  </div>
+                )}
+              </div>
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-foreground">{selectedLawyer.name}</h2>
                 <p className="text-muted-foreground flex items-center gap-2 mt-1">
@@ -263,6 +381,8 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
   }
 
   if (step === "results") {
+    const realCount = lawyers.filter(l => l.isReal).length;
+    
     return (
       <div>
         <Button variant="ghost" className="mb-4" onClick={() => setStep("select")}>
@@ -274,7 +394,10 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
           {selectedCity && ` in ${selectedCity}`}
           {selectedState && !selectedCity && ` in ${selectedState}`}
         </h2>
-        <p className="text-muted-foreground mb-6">{lawyers.length} lawyers found</p>
+        <p className="text-muted-foreground mb-6">
+          {lawyers.length} lawyers found
+          {realCount > 0 && <span className="text-nyay-teal ml-2">({realCount} verified)</span>}
+        </p>
 
         {lawyers.length === 0 ? (
           <Card className="text-center py-12">
@@ -293,7 +416,7 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
               return (
                 <Card
                   key={lawyer.id}
-                  className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden"
+                  className={`cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden ${lawyer.isReal ? 'ring-2 ring-nyay-teal/30' : ''}`}
                   onClick={() => {
                     setSelectedLawyer(lawyer);
                     setStep("profile");
@@ -302,11 +425,18 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
                   <CardContent className="p-0">
                     <div className="p-4">
                       <div className="flex items-start gap-4">
-                        <img 
-                          src={lawyer.profileImage} 
-                          alt={lawyer.name}
-                          className="w-14 h-14 rounded-xl object-cover shadow-sm"
-                        />
+                        <div className="relative">
+                          <img 
+                            src={lawyer.profileImage} 
+                            alt={lawyer.name}
+                            className="w-14 h-14 rounded-xl object-cover shadow-sm"
+                          />
+                          {lawyer.isReal && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-nyay-teal rounded-full flex items-center justify-center">
+                              <BadgeCheck className="w-3 h-3 text-primary-foreground" />
+                            </div>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-foreground truncate">{lawyer.name}</h3>
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -434,8 +564,8 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
             </div>
           )}
 
-          <Button variant="gold" size="lg" className="w-full" onClick={handleSearch}>
-            Find Lawyers
+          <Button variant="gold" size="lg" className="w-full" onClick={handleSearch} disabled={isSearching}>
+            {isSearching ? 'Searching...' : 'Find Lawyers'}
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </CardContent>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Paperclip, ArrowLeft, Phone, Video, MoreVertical, Check, CheckCheck, Image, FileText, X } from "lucide-react";
+import { Send, Paperclip, ArrowLeft, Phone, Video, MoreVertical, Check, CheckCheck, Image, FileText, X, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,6 +19,14 @@ interface Message {
   fileName?: string;
 }
 
+interface ChatPartnerInfo {
+  name: string;
+  specialization?: string;
+  city?: string;
+  profileImage?: string;
+  isReal: boolean;
+}
+
 interface LawyerChatProps {
   lawyerId: string;
   onBack: () => void;
@@ -33,11 +41,17 @@ const isDummyLawyerId = (id: string) => {
   return id.startsWith('l') && !id.includes('-');
 };
 
+const getAvatarUrl = (name: string) => {
+  const bgColors = ['0D9488', '6366F1', 'D97706', 'DC2626', '7C3AED', '059669'];
+  const randomColor = bgColors[Math.abs(name.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % bgColors.length];
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${randomColor}&color=fff&size=200&bold=true`;
+};
+
 const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartnerId, chatPartnerName }: LawyerChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [lawyer, setLawyer] = useState<Lawyer | null>(null);
+  const [partnerInfo, setPartnerInfo] = useState<ChatPartnerInfo | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -51,13 +65,22 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
         setCurrentUserId(user.id);
       }
       
-      // Check if this is a dummy lawyer
       const partnerId = userType === 'user' ? lawyerId : chatPartnerId;
+      
+      // Check if this is a dummy lawyer
       if (partnerId && isDummyLawyerId(partnerId)) {
         setIsDemoMode(true);
         if (userType === 'user') {
           const lawyerData = getLawyerById(lawyerId);
-          setLawyer(lawyerData || null);
+          if (lawyerData) {
+            setPartnerInfo({
+              name: lawyerData.name,
+              specialization: lawyerData.specialization,
+              city: lawyerData.city,
+              profileImage: lawyerData.profileImage,
+              isReal: false
+            });
+          }
         }
         // Load demo messages from localStorage
         const storedMessages = localStorage.getItem(`chat_${partnerId}_${user?.id}`);
@@ -68,9 +91,36 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
         return;
       }
       
-      if (userType === 'user') {
-        const lawyerData = getLawyerById(lawyerId);
-        setLawyer(lawyerData || null);
+      // Fetch real lawyer/user profile
+      if (partnerId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, practice_area, city, state, user_type')
+          .eq('id', partnerId)
+          .maybeSingle();
+        
+        if (profile) {
+          const isLawyer = profile.user_type === 'lawyer';
+          setPartnerInfo({
+            name: isLawyer ? `Adv. ${profile.full_name}` : profile.full_name || 'User',
+            specialization: profile.practice_area,
+            city: profile.city,
+            profileImage: getAvatarUrl(profile.full_name || 'User'),
+            isReal: true
+          });
+        } else if (userType === 'user') {
+          // Fallback to dummy data
+          const lawyerData = getLawyerById(lawyerId);
+          if (lawyerData) {
+            setPartnerInfo({
+              name: lawyerData.name,
+              specialization: lawyerData.specialization,
+              city: lawyerData.city,
+              profileImage: lawyerData.profileImage,
+              isReal: false
+            });
+          }
+        }
       }
       
       await fetchMessages();
@@ -275,8 +325,9 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  const partnerName = userType === 'user' ? lawyer?.name : chatPartnerName;
-  const partnerImage = userType === 'user' ? lawyer?.profileImage : null;
+  const partnerName = userType === 'user' ? partnerInfo?.name : chatPartnerName || partnerInfo?.name;
+  const partnerImage = partnerInfo?.profileImage;
+  const isRealLawyer = partnerInfo?.isReal;
 
   if (isLoading) {
     return (
@@ -311,9 +362,14 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
         )}
         
         <div className="flex-1">
-          <h3 className="font-semibold">{partnerName || 'Chat'}</h3>
-          {userType === 'user' && lawyer && (
-            <p className="text-xs text-primary-foreground/80">{lawyer.specialization} • {lawyer.city}</p>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold">{partnerName || 'Chat'}</h3>
+            {isRealLawyer && (
+              <BadgeCheck className="w-4 h-4 text-nyay-gold" />
+            )}
+          </div>
+          {userType === 'user' && partnerInfo && (
+            <p className="text-xs text-primary-foreground/80">{partnerInfo.specialization} • {partnerInfo.city}</p>
           )}
           {caseType && (
             <p className="text-xs text-primary-foreground/80">Re: {caseType}</p>
