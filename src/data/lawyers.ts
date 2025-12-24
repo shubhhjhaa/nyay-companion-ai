@@ -259,6 +259,10 @@ export const dummyLawyers: Lawyer[] = [
   },
 ];
 
+export const getLawyerById = (id: string): Lawyer | undefined => {
+  return dummyLawyers.find((lawyer) => lawyer.id === id);
+};
+
 export const getLawyersBySpecialization = (specialization: string): Lawyer[] => {
   return dummyLawyers.filter(
     (lawyer) => lawyer.specialization.toLowerCase() === specialization.toLowerCase()
