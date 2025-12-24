@@ -136,7 +136,7 @@ const UserDashboard = () => {
               ))}
             </div>
 
-            <h2 className="text-xl font-semibold mb-4">Your Dashboard</h2>
+            <h2 className="text-xl font-semibold mb-4">Quick Access</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {userFeatures.map((feature) => (
                 <Card key={feature.id} className="cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5" onClick={() => setActiveFeature(feature.id)}>
