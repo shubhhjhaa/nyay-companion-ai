@@ -28,6 +28,11 @@ interface LawyerChatProps {
   chatPartnerName?: string;
 }
 
+// Check if ID is a dummy lawyer ID (not a UUID)
+const isDummyLawyerId = (id: string) => {
+  return id.startsWith('l') && !id.includes('-');
+};
+
 const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartnerId, chatPartnerName }: LawyerChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -35,6 +40,7 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
   const [lawyer, setLawyer] = useState<Lawyer | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,6 +49,23 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setCurrentUserId(user.id);
+      }
+      
+      // Check if this is a dummy lawyer
+      const partnerId = userType === 'user' ? lawyerId : chatPartnerId;
+      if (partnerId && isDummyLawyerId(partnerId)) {
+        setIsDemoMode(true);
+        if (userType === 'user') {
+          const lawyerData = getLawyerById(lawyerId);
+          setLawyer(lawyerData || null);
+        }
+        // Load demo messages from localStorage
+        const storedMessages = localStorage.getItem(`chat_${partnerId}_${user?.id}`);
+        if (storedMessages) {
+          setMessages(JSON.parse(storedMessages));
+        }
+        setIsLoading(false);
+        return;
       }
       
       if (userType === 'user') {
@@ -56,32 +79,33 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
 
     initChat();
 
-    // Subscribe to realtime messages
-    const channel = supabase
-      .channel('messages-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          if (
-            (newMsg.sender_id === currentUserId || newMsg.receiver_id === currentUserId) &&
-            (newMsg.sender_id === lawyerId || newMsg.receiver_id === lawyerId ||
-             newMsg.sender_id === chatPartnerId || newMsg.receiver_id === chatPartnerId)
-          ) {
-            setMessages(prev => [...prev, newMsg]);
+    // Subscribe to realtime messages only if not demo mode
+    if (!isDemoMode) {
+      const channel = supabase
+        .channel('messages-channel')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages'
+          },
+          (payload) => {
+            const newMsg = payload.new as Message;
+            if (
+              (newMsg.sender_id === currentUserId || newMsg.receiver_id === currentUserId) &&
+              (newMsg.sender_id === chatPartnerId || newMsg.receiver_id === chatPartnerId)
+            ) {
+              setMessages(prev => [...prev, newMsg]);
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [lawyerId, chatPartnerId, currentUserId, userType]);
 
   useEffect(() => {
@@ -90,12 +114,21 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
     }
   }, [messages]);
 
+  // Save demo messages to localStorage
+  useEffect(() => {
+    if (isDemoMode && currentUserId && messages.length > 0) {
+      const partnerId = userType === 'user' ? lawyerId : chatPartnerId;
+      localStorage.setItem(`chat_${partnerId}_${currentUserId}`, JSON.stringify(messages));
+    }
+  }, [messages, isDemoMode, currentUserId, lawyerId, chatPartnerId, userType]);
+
   const fetchMessages = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       const partnerId = userType === 'user' ? lawyerId : chatPartnerId;
+      if (!partnerId || isDummyLawyerId(partnerId)) return;
 
       const { data, error } = await supabase
         .from('messages')
@@ -125,26 +158,76 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
       let fileName = '';
 
       if (selectedFile) {
-        // Upload file to storage
-        const fileExt = selectedFile.name.split('.').pop();
-        const filePath = `${currentUserId}/${Date.now()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('case-documents')
-          .upload(filePath, selectedFile);
+        // For demo mode, just show file name
+        if (isDemoMode) {
+          messageContent = `📎 ${selectedFile.name}`;
+        } else {
+          // Upload file to storage
+          const fileExt = selectedFile.name.split('.').pop();
+          const filePath = `${currentUserId}/${Date.now()}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('case-documents')
+            .upload(filePath, selectedFile);
 
-        if (uploadError) throw uploadError;
+          if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('case-documents')
-          .getPublicUrl(filePath);
+          const { data: { publicUrl } } = supabase.storage
+            .from('case-documents')
+            .getPublicUrl(filePath);
 
-        messageContent = publicUrl;
+          messageContent = publicUrl;
+        }
         isFile = true;
         fileName = selectedFile.name;
         setSelectedFile(null);
       }
 
+      const newMsg: Message = {
+        id: Date.now().toString(),
+        content: messageContent,
+        sender_id: currentUserId,
+        receiver_id: receiverId!,
+        created_at: new Date().toISOString(),
+        status: 'sent',
+        case_type: caseType,
+        isFile,
+        fileName
+      };
+
+      // For demo mode, just add to local state
+      if (isDemoMode) {
+        setMessages(prev => [...prev, newMsg]);
+        setNewMessage("");
+        
+        // Simulate lawyer response after a delay
+        setTimeout(() => {
+          const responses = [
+            "Thank you for reaching out. I have reviewed your case details.",
+            "I understand your concern. Let me look into this matter.",
+            "I will need some additional documents to proceed further.",
+            "Based on the information provided, I can assist you with this case.",
+            "Please share any supporting documents you have for this case."
+          ];
+          const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+          
+          const lawyerMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            content: randomResponse,
+            sender_id: receiverId!,
+            receiver_id: currentUserId,
+            created_at: new Date().toISOString(),
+            status: 'sent',
+            case_type: caseType
+          };
+          setMessages(prev => [...prev, lawyerMsg]);
+        }, 1500 + Math.random() * 2000);
+        
+        toast.success("Message sent to lawyer");
+        return;
+      }
+
+      // For real lawyers, save to database
       const { error } = await supabase
         .from('messages')
         .insert({
@@ -157,19 +240,7 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
 
       if (error) throw error;
 
-      // Optimistically add message
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        content: messageContent,
-        sender_id: currentUserId,
-        receiver_id: receiverId!,
-        created_at: new Date().toISOString(),
-        status: 'sent',
-        case_type: caseType,
-        isFile,
-        fileName
-      }]);
-
+      setMessages(prev => [...prev, newMsg]);
       setNewMessage("");
     } catch (error) {
       console.error('Error sending message:', error);
@@ -180,7 +251,7 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         toast.error("File size should be less than 10MB");
         return;
       }
@@ -262,6 +333,13 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
         </div>
       </div>
 
+      {/* Demo Mode Banner */}
+      {isDemoMode && (
+        <div className="px-4 py-2 bg-nyay-gold/10 text-nyay-gold text-xs text-center">
+          Demo Mode: Chatting with simulated lawyer profile
+        </div>
+      )}
+
       {/* Messages Area */}
       <ScrollArea className="flex-1 p-4 bg-muted/30" ref={scrollRef}>
         {messages.length === 0 ? (
@@ -305,6 +383,11 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
                               <FileText className="w-4 h-4" />
                               <span className="text-sm">View Document</span>
                             </a>
+                          ) : msg.content.startsWith('📎') ? (
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4" />
+                              <span className="text-sm">{msg.content.replace('📎 ', '')}</span>
+                            </div>
                           ) : (
                             <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                           )}
