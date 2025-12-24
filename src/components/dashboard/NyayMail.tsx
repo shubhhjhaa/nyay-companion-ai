@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Send, Loader2, Copy, Check, ChevronRight } from "lucide-react";
+import { Mail, Send, Loader2, Copy, Check, ChevronRight, Phone, Globe, MapPin, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,16 +11,26 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { caseTypes } from "@/data/caseTypes";
 
+interface CompanyDetails {
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  address: string | null;
+  confidence: "high" | "medium" | "low";
+}
+
 interface EmailResult {
   subject: string;
   body: string;
   tips: string[];
+  companyDetails?: CompanyDetails;
 }
 
 const NyayMail = () => {
   const [step, setStep] = useState<"form" | "generating" | "result">("form");
   const [emailResult, setEmailResult] = useState<EmailResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedContacts, setCopiedContacts] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Form state
@@ -80,6 +90,23 @@ const NyayMail = () => {
     setCopied(true);
     toast.success("Email copied to clipboard!");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyContacts = async () => {
+    if (!emailResult?.companyDetails) return;
+    
+    const details = emailResult.companyDetails;
+    const contactText = [
+      details.email && `Email: ${details.email}`,
+      details.phone && `Phone: ${details.phone}`,
+      details.website && `Website: ${details.website}`,
+      details.address && `Address: ${details.address}`,
+    ].filter(Boolean).join("\n");
+    
+    await navigator.clipboard.writeText(contactText);
+    setCopiedContacts(true);
+    toast.success("Contact details copied!");
+    setTimeout(() => setCopiedContacts(false), 2000);
   };
 
   const resetForm = () => {
@@ -164,6 +191,95 @@ const NyayMail = () => {
               </>
             )}
           </Button>
+
+          {/* Detected Company Contact Details */}
+          {emailResult.companyDetails && (
+            <Card className="shadow-card border-nyay-indigo/20">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-nyay-indigo/10 flex items-center justify-center">
+                      <Mail className="w-4 h-4 text-nyay-indigo" />
+                    </div>
+                    <CardTitle className="text-lg">Detected Company Contact Details</CardTitle>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    emailResult.companyDetails.confidence === 'high' 
+                      ? 'bg-green-100 text-green-700' 
+                      : emailResult.companyDetails.confidence === 'medium'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-orange-100 text-orange-700'
+                  }`}>
+                    AI-detected ({emailResult.companyDetails.confidence})
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid gap-3">
+                  {emailResult.companyDetails.email && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                      <Mail className="w-4 h-4 text-nyay-indigo shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">Email</p>
+                        <p className="text-sm font-medium truncate">{emailResult.companyDetails.email}</p>
+                      </div>
+                    </div>
+                  )}
+                  {emailResult.companyDetails.phone && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                      <Phone className="w-4 h-4 text-nyay-indigo shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">Customer Support / Helpline</p>
+                        <p className="text-sm font-medium">{emailResult.companyDetails.phone}</p>
+                      </div>
+                    </div>
+                  )}
+                  {emailResult.companyDetails.website && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                      <Globe className="w-4 h-4 text-nyay-indigo shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">Website</p>
+                        <p className="text-sm font-medium truncate">{emailResult.companyDetails.website}</p>
+                      </div>
+                    </div>
+                  )}
+                  {emailResult.companyDetails.address && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      <MapPin className="w-4 h-4 text-nyay-indigo shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">Registered Office Address</p>
+                        <p className="text-sm font-medium">{emailResult.companyDetails.address}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={handleCopyContacts}
+                >
+                  {copiedContacts ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Contact Details
+                    </>
+                  )}
+                </Button>
+
+                <div className="flex items-start gap-2 text-xs text-muted-foreground mt-2">
+                  <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
+                  <p>Company contact details are AI-detected from publicly available information and should be verified before use.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Tips */}
           {emailResult.tips && emailResult.tips.length > 0 && (

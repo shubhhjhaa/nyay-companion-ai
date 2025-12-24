@@ -21,7 +21,7 @@ serve(async (req) => {
 
     console.log('Generating email for:', formData.caseType);
 
-    const systemPrompt = `You are NyayMail, an AI email generator for Indian legal matters. Generate a professional, legally-structured email based on the provided information.
+const systemPrompt = `You are NyayMail, an AI email generator for Indian legal matters. Generate a professional, legally-structured email based on the provided information.
 
 Generate a formal email with:
 1. Professional subject line
@@ -32,11 +32,20 @@ Generate a formal email with:
 6. Deadline for response (typically 15-30 days)
 7. Professional closing
 
+ALSO: Based on the company/opposite party name provided, detect and provide their official contact details from your knowledge of major Indian and international companies.
+
 Your response MUST be in this exact JSON format:
 {
   "subject": "Email subject line",
   "body": "Full email body with proper formatting and line breaks",
-  "tips": ["List of tips for the user about what to do after sending"]
+  "tips": ["List of tips for the user about what to do after sending"],
+  "companyDetails": {
+    "email": "Official customer support/grievance email if known, or null",
+    "phone": "Customer support helpline number if known, or null",
+    "website": "Official company website if known, or null",
+    "address": "Registered office address if known, or null",
+    "confidence": "high/medium/low - how confident you are about these details"
+  }
 }
 
 Important guidelines:
@@ -46,6 +55,9 @@ Important guidelines:
 - Reference National Consumer Helpline if relevant
 - Be assertive but professional
 - Include specific dates and amounts where applicable
+- For companyDetails, use your knowledge of well-known companies (banks, telecom, e-commerce, airlines, etc.)
+- If company is not well-known, try to infer common patterns (e.g., support@company.com, company.com)
+- Set confidence to "low" if details are inferred rather than known
 
 Always respond with valid JSON only, no additional text.`;
 
