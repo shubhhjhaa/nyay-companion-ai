@@ -196,6 +196,50 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_emails: {
+        Row: {
+          body: string
+          case_type: string | null
+          created_at: string
+          email_type: string
+          id: string
+          opposite_party: string | null
+          parent_email_id: string | null
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          case_type?: string | null
+          created_at?: string
+          email_type?: string
+          id?: string
+          opposite_party?: string | null
+          parent_email_id?: string | null
+          subject: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          case_type?: string | null
+          created_at?: string
+          email_type?: string
+          id?: string
+          opposite_party?: string | null
+          parent_email_id?: string | null
+          subject?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_emails_parent_email_id_fkey"
+            columns: ["parent_email_id"]
+            isOneToOne: false
+            referencedRelation: "saved_emails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_lawyers: {
         Row: {
           created_at: string | null
