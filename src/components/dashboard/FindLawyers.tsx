@@ -317,6 +317,26 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer, nyayScanData }
 
       if (caseError) throw caseError;
 
+      // Send the AI-generated case summary as the first message in the chat
+      if (caseDescription && caseDescription.length > 50) {
+        const messageContent = `📋 **Case Summary**\n\n${caseDescription}`;
+        
+        const { error: messageError } = await supabase
+          .from('messages')
+          .insert({
+            content: messageContent,
+            sender_id: user.id,
+            receiver_id: lawyer.id,
+            case_id: newCase.id,
+            case_type: selectedCaseType || 'General Consultation',
+            status: 'pending'
+          });
+
+        if (messageError) {
+          console.error('Error sending case summary message:', messageError);
+        }
+      }
+
       // Send notification to lawyer if they're a real lawyer
       if (lawyer.isReal) {
         await supabase.from('notifications').insert({
@@ -328,7 +348,7 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer, nyayScanData }
         });
       }
 
-      toast.success(`Connected with ${lawyer.name}! Detailed case summary sent.`);
+      toast.success(`Connected with ${lawyer.name}! Case summary sent to chat.`);
       
       if (onConnectLawyer && newCase) {
         onConnectLawyer(lawyer.id, selectedCaseType, newCase.id);
