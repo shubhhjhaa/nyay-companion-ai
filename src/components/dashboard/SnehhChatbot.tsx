@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { MessageCircle, X, Send, User, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import snehhAvatar from "@/assets/snehh-avatar.png";
 
 interface Message {
   role: "user" | "assistant";
@@ -190,9 +191,7 @@ const SnehhChatbot = () => {
         <Card className="fixed bottom-24 right-6 z-50 w-[380px] h-[520px] flex flex-col shadow-xl animate-scale-in overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-hero p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <img src={snehhAvatar} alt="Snehh" className="w-10 h-10 rounded-full object-cover" />
             <div className="flex-1">
               <h3 className="font-semibold text-primary-foreground">Snehh</h3>
               <p className="text-xs text-primary-foreground/80">Your AI Legal Assistant</p>
@@ -215,19 +214,13 @@ const SnehhChatbot = () => {
                   key={idx}
                   className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
                 >
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      msg.role === "user"
-                        ? "bg-nyay-gold/20"
-                        : "bg-gradient-hero"
-                    }`}
-                  >
-                    {msg.role === "user" ? (
+                  {msg.role === "user" ? (
+                    <div className="w-8 h-8 rounded-full bg-nyay-gold/20 flex items-center justify-center flex-shrink-0">
                       <User className="w-4 h-4 text-nyay-gold" />
-                    ) : (
-                      <Bot className="w-4 h-4 text-primary-foreground" />
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <img src={snehhAvatar} alt="Snehh" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                  )}
                   <div
                     className={`max-w-[75%] p-3 rounded-2xl text-sm ${
                       msg.role === "user"
@@ -241,9 +234,7 @@ const SnehhChatbot = () => {
               ))}
               {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-hero flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 text-primary-foreground" />
-                  </div>
+                  <img src={snehhAvatar} alt="Snehh" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                   <div className="bg-muted p-3 rounded-2xl rounded-tl-sm">
                     <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                   </div>
