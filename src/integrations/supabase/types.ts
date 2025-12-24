@@ -14,8 +14,91 @@ export type Database = {
   }
   public: {
     Tables: {
+      cases: {
+        Row: {
+          ai_analysis: Json | null
+          case_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          lawyer_id: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          case_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          lawyer_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_analysis?: Json | null
+          case_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          lawyer_id?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lawyer_reviews: {
+        Row: {
+          case_id: string | null
+          created_at: string | null
+          feedback: string | null
+          id: string
+          lawyer_id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string | null
+          feedback?: string | null
+          id?: string
+          lawyer_id: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string | null
+          feedback?: string | null
+          id?: string
+          lawyer_id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_reviews_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
+          case_id: string | null
           case_type: string | null
           content: string
           created_at: string | null
@@ -25,6 +108,7 @@ export type Database = {
           status: string | null
         }
         Insert: {
+          case_id?: string | null
           case_type?: string | null
           content: string
           created_at?: string | null
@@ -34,6 +118,7 @@ export type Database = {
           status?: string | null
         }
         Update: {
+          case_id?: string | null
           case_type?: string | null
           content?: string
           created_at?: string | null
@@ -41,6 +126,39 @@ export type Database = {
           receiver_id?: string | null
           sender_id?: string | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          case_id: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -85,6 +203,35 @@ export type Database = {
           user_type?: string | null
         }
         Relationships: []
+      }
+      saved_lawyers: {
+        Row: {
+          created_at: string | null
+          id: string
+          lawyer_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lawyer_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lawyer_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_lawyers_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
