@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getLawyerById, Lawyer } from "@/data/lawyers";
 
 interface Case {
   id: string;
@@ -26,6 +27,7 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
   const [cases, setCases] = useState<Case[]>([]);
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lawyerDetails, setLawyerDetails] = useState<Record<string, Lawyer | undefined>>({});
 
   useEffect(() => {
     fetchCases();
@@ -44,6 +46,43 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
 
       if (error) throw error;
       setCases(data || []);
+
+      // Fetch lawyer details for each case
+      const lawyerMap: Record<string, Lawyer | undefined> = {};
+      for (const caseItem of data || []) {
+        if (caseItem.lawyer_id) {
+          // Check if it's a dummy lawyer ID
+          if (caseItem.lawyer_id.startsWith('l') && !caseItem.lawyer_id.includes('-')) {
+            lawyerMap[caseItem.lawyer_id] = getLawyerById(caseItem.lawyer_id);
+          } else {
+            // Fetch from profiles table for real lawyers
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('full_name, practice_area, city, state')
+              .eq('id', caseItem.lawyer_id)
+              .single();
+            
+            if (profile) {
+              lawyerMap[caseItem.lawyer_id] = {
+                id: caseItem.lawyer_id,
+                name: profile.full_name || 'Unknown Lawyer',
+                city: profile.city || '',
+                state: profile.state || '',
+                specialization: profile.practice_area || '',
+                experience: 0,
+                languages: [],
+                barCouncilId: '',
+                availability: '',
+                rating: 0,
+                casesWon: 0,
+                profileImage: '',
+                gender: 'male'
+              };
+            }
+          }
+        }
+      }
+      setLawyerDetails(lawyerMap);
     } catch (error) {
       console.error('Error fetching cases:', error);
       toast.error('Failed to load cases');
@@ -54,9 +93,9 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'closed': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+      case 'in_progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'closed': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
       default: return 'bg-muted text-muted-foreground';
     }
   };
@@ -86,6 +125,8 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
   }
 
   if (selectedCase) {
+    const lawyer = selectedCase.lawyer_id ? lawyerDetails[selectedCase.lawyer_id] : null;
+    
     return (
       <div className="max-w-3xl mx-auto">
         <Button variant="ghost" className="mb-4" onClick={() => setSelectedCase(null)}>
@@ -107,23 +148,59 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
               </div>
               <h2 className="text-2xl font-bold text-foreground mb-2">{selectedCase.case_type}</h2>
               <p className="text-muted-foreground">{selectedCase.description}</p>
-              <div className="flex gap-4 mt-4 text-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-4 mt-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
                   Created: {formatDate(selectedCase.created_at)}
                 </span>
-                {selectedCase.lawyer_id && (
-                  <span className="flex items-center gap-1">
-                    <User className="w-4 h-4" />
-                    Lawyer Assigned
-                  </span>
-                )}
               </div>
             </CardContent>
           </Card>
 
+          {/* Lawyer Details */}
+          {lawyer && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <User className="w-5 h-5 text-nyay-gold" />
+                  Assigned Lawyer
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  {lawyer.profileImage ? (
+                    <img 
+                      src={lawyer.profileImage} 
+                      alt={lawyer.name}
+                      className="w-16 h-16 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl bg-gradient-hero flex items-center justify-center text-xl font-bold text-primary-foreground">
+                      {lawyer.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground text-lg">{lawyer.name}</h3>
+                    <p className="text-sm text-muted-foreground">{lawyer.specialization}</p>
+                    {lawyer.city && (
+                      <p className="text-sm text-muted-foreground">{lawyer.city}, {lawyer.state}</p>
+                    )}
+                  </div>
+                </div>
+                <Button 
+                  variant="gold" 
+                  className="w-full mt-4"
+                  onClick={() => onOpenChat?.(selectedCase.id, selectedCase.lawyer_id!)}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Open Chat with {lawyer.name.split(' ')[1] || lawyer.name}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* AI Analysis Timeline */}
-          {selectedCase.ai_analysis && (
+          {selectedCase.ai_analysis && selectedCase.ai_analysis.nextSteps && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -159,21 +236,9 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
           )}
 
           {/* Actions */}
-          <div className="grid grid-cols-2 gap-4">
-            {selectedCase.lawyer_id && (
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => onOpenChat?.(selectedCase.id, selectedCase.lawyer_id!)}
-              >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                View Chat History
-              </Button>
-            )}
-            <Button variant="gold" className="w-full col-span-2" onClick={() => setSelectedCase(null)}>
-              Back to Cases
-            </Button>
-          </div>
+          <Button variant="outline" className="w-full" onClick={() => setSelectedCase(null)}>
+            Back to Cases
+          </Button>
         </div>
       </div>
     );
@@ -197,51 +262,77 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
             <Folder className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Cases Yet</h3>
             <p className="text-muted-foreground text-sm">
-              Your case history will appear here after you consult with lawyers or use NyayScan.
+              Your case history will appear here when you connect with lawyers.
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {cases.map((caseItem) => (
-            <Card
-              key={caseItem.id}
-              className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5"
-              onClick={() => setSelectedCase(caseItem)}
-            >
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="font-mono text-xs text-muted-foreground">
-                        #{caseItem.id.slice(0, 8).toUpperCase()}
-                      </span>
-                      <Badge className={getStatusColor(caseItem.status)}>
-                        {caseItem.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-                    <h3 className="font-semibold text-foreground">{caseItem.case_type}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
-                      {caseItem.description || 'No description'}
-                    </p>
-                    <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {formatDate(caseItem.created_at)}
-                      </span>
-                      {caseItem.lawyer_id && (
-                        <span className="flex items-center gap-1">
-                          <User className="w-3 h-3" />
-                          Lawyer Assigned
+          {cases.map((caseItem) => {
+            const lawyer = caseItem.lawyer_id ? lawyerDetails[caseItem.lawyer_id] : null;
+            
+            return (
+              <Card
+                key={caseItem.id}
+                className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5"
+                onClick={() => setSelectedCase(caseItem)}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-4">
+                    {/* Lawyer Avatar */}
+                    {lawyer?.profileImage ? (
+                      <img 
+                        src={lawyer.profileImage} 
+                        alt={lawyer.name}
+                        className="w-12 h-12 rounded-xl object-cover shrink-0"
+                      />
+                    ) : lawyer ? (
+                      <div className="w-12 h-12 rounded-xl bg-gradient-hero flex items-center justify-center text-lg font-bold text-primary-foreground shrink-0">
+                        {lawyer.name.charAt(0)}
+                      </div>
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                        <Folder className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="font-mono text-xs text-muted-foreground">
+                          #{caseItem.id.slice(0, 8).toUpperCase()}
                         </span>
+                        <Badge className={getStatusColor(caseItem.status)}>
+                          {caseItem.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                      <h3 className="font-semibold text-foreground">{caseItem.case_type}</h3>
+                      {lawyer && (
+                        <p className="text-sm text-nyay-teal font-medium mt-1">
+                          {lawyer.name}
+                        </p>
                       )}
+                      <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
+                        {caseItem.description || 'No description'}
+                      </p>
+                      <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {formatDate(caseItem.created_at)}
+                        </span>
+                        {lawyer && (
+                          <span className="flex items-center gap-1">
+                            <MessageSquare className="w-3 h-3" />
+                            Chat Available
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
