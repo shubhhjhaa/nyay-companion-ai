@@ -14,6 +14,7 @@ type ActiveFeature = "home" | "find" | "nyayscan" | "nyaymail";
 const UserDashboard = () => {
   const navigate = useNavigate();
   const [activeFeature, setActiveFeature] = useState<ActiveFeature>("home");
+  const [prefillCaseType, setPrefillCaseType] = useState<string>("");
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -48,12 +49,17 @@ const UserDashboard = () => {
     },
   ];
 
+  const handleFindLawyersFromScan = (caseType: string) => {
+    setPrefillCaseType(caseType);
+    setActiveFeature("find");
+  };
+
   const renderContent = () => {
     switch (activeFeature) {
       case "find":
-        return <FindLawyers />;
+        return <FindLawyers prefillCaseType={prefillCaseType} onClear={() => setPrefillCaseType("")} />;
       case "nyayscan":
-        return <NyayScan />;
+        return <NyayScan onFindLawyers={handleFindLawyersFromScan} />;
       case "nyaymail":
         return <NyayMail />;
       default:

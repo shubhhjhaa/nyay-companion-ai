@@ -21,7 +21,11 @@ interface CaseAnalysis {
   estimatedTimeframe: string;
 }
 
-const NyayScan = () => {
+interface NyayScanProps {
+  onFindLawyers?: (caseType: string) => void;
+}
+
+const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
   const [step, setStep] = useState<"input" | "analyzing" | "result" | "consumer-check" | "proceed-choice">("input");
   const [caseDescription, setCaseDescription] = useState("");
   const [analysis, setAnalysis] = useState<CaseAnalysis | null>(null);
@@ -390,7 +394,7 @@ const NyayScan = () => {
                       <p className="text-primary-foreground/80 text-sm">Find experienced lawyers specialized in your case type</p>
                     </div>
                   </div>
-                  <Button variant="gold" onClick={() => window.location.reload()}>
+                  <Button variant="gold" onClick={() => onFindLawyers?.(analysis.caseType)}>
                     Find Lawyers
                   </Button>
                 </div>
