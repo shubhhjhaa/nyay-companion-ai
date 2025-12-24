@@ -48,15 +48,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "cases_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       lawyer_reviews: {
         Row: {
@@ -223,15 +215,7 @@ export type Database = {
           lawyer_id?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "saved_lawyers_lawyer_id_fkey"
-            columns: ["lawyer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
