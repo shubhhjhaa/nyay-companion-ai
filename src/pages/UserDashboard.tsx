@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText } from "lucide-react";
+import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,13 +14,20 @@ import SavedLawyers from "@/components/dashboard/SavedLawyers";
 import Notifications from "@/components/dashboard/Notifications";
 import LegalDictionary from "@/components/dashboard/LegalDictionary";
 import PrivacySettings from "@/components/dashboard/PrivacySettings";
+import LawyerChat from "@/components/dashboard/LawyerChat";
 
-type ActiveFeature = "home" | "find" | "nyayscan" | "nyaymail" | "nyaynotice" | "cases" | "saved" | "notifications" | "dictionary" | "privacy";
+type ActiveFeature = "home" | "find" | "nyayscan" | "nyaymail" | "nyaynotice" | "cases" | "saved" | "notifications" | "dictionary" | "privacy" | "chat";
+
+interface ChatState {
+  lawyerId: string;
+  caseType: string;
+}
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const [activeFeature, setActiveFeature] = useState<ActiveFeature>("home");
   const [prefillCaseType, setPrefillCaseType] = useState<string>("");
+  const [chatState, setChatState] = useState<ChatState | null>(null);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -48,24 +55,65 @@ const UserDashboard = () => {
     setActiveFeature("find");
   };
 
+  const handleConnectLawyer = (lawyerId: string, caseType: string) => {
+    setChatState({ lawyerId, caseType });
+    setActiveFeature("chat");
+  };
+
+  const handleContactFromSaved = (lawyerId: string) => {
+    setChatState({ lawyerId, caseType: '' });
+    setActiveFeature("chat");
+  };
+
   const renderContent = () => {
     switch (activeFeature) {
-      case "find": return <FindLawyers prefillCaseType={prefillCaseType} onClear={() => setPrefillCaseType("")} />;
-      case "nyayscan": return <NyayScan onFindLawyers={handleFindLawyersFromScan} />;
-      case "nyaymail": return <NyayMail />;
-      case "nyaynotice": return <NyayNotice onFindLawyers={handleFindLawyersFromScan} />;
-      case "cases": return <MyCases />;
-      case "saved": return <SavedLawyers />;
-      case "notifications": return <Notifications />;
-      case "dictionary": return <LegalDictionary />;
-      case "privacy": return <PrivacySettings />;
+      case "find": 
+        return (
+          <FindLawyers 
+            prefillCaseType={prefillCaseType} 
+            onClear={() => setPrefillCaseType("")} 
+            onConnectLawyer={handleConnectLawyer}
+          />
+        );
+      case "nyayscan": 
+        return <NyayScan onFindLawyers={handleFindLawyersFromScan} />;
+      case "nyaymail": 
+        return <NyayMail />;
+      case "nyaynotice": 
+        return <NyayNotice onFindLawyers={handleFindLawyersFromScan} />;
+      case "cases": 
+        return <MyCases />;
+      case "saved": 
+        return <SavedLawyers onContactLawyer={handleContactFromSaved} />;
+      case "notifications": 
+        return <Notifications />;
+      case "dictionary": 
+        return <LegalDictionary />;
+      case "privacy": 
+        return <PrivacySettings />;
+      case "chat":
+        if (!chatState) {
+          setActiveFeature("home");
+          return null;
+        }
+        return (
+          <LawyerChat 
+            lawyerId={chatState.lawyerId}
+            caseType={chatState.caseType}
+            onBack={() => {
+              setChatState(null);
+              setActiveFeature("find");
+            }}
+            userType="user"
+          />
+        );
       default:
         return (
           <>
             <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to NyayBuddy</h1>
             <p className="text-muted-foreground mb-8">How can we help you today?</p>
 
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {mainFeatures.map((feature) => (
                 <Card key={feature.id} className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1" onClick={() => setActiveFeature(feature.id)}>
                   <CardHeader className="pb-3">
@@ -105,7 +153,12 @@ const UserDashboard = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {activeFeature !== "home" && (
-              <Button variant="ghost" size="icon-sm" onClick={() => setActiveFeature("home")}>
+              <Button variant="ghost" size="icon-sm" onClick={() => {
+                if (activeFeature === "chat") {
+                  setChatState(null);
+                }
+                setActiveFeature("home");
+              }}>
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             )}

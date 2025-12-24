@@ -10,8 +10,16 @@ export interface Lawyer {
   availability: string;
   rating: number;
   casesWon: number;
-  profileImage?: string;
+  profileImage: string;
+  gender: 'male' | 'female';
 }
+
+// Using UI Avatars API for consistent, professional avatars
+const getAvatarUrl = (name: string, gender: 'male' | 'female') => {
+  const bgColors = ['0D9488', '6366F1', 'D97706', 'DC2626', '7C3AED', '059669'];
+  const randomColor = bgColors[Math.abs(name.split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % bgColors.length];
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${randomColor}&color=fff&size=200&bold=true`;
+};
 
 export const dummyLawyers: Lawyer[] = [
   // Consumer Court Lawyers
@@ -27,6 +35,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 10 AM - 6 PM",
     rating: 4.8,
     casesWon: 245,
+    gender: 'female',
+    profileImage: getAvatarUrl("Priya Sharma", 'female'),
   },
   {
     id: "l2",
@@ -40,6 +50,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Sat, 9 AM - 7 PM",
     rating: 4.9,
     casesWon: 312,
+    gender: 'male',
+    profileImage: getAvatarUrl("Rajesh Kumar", 'male'),
   },
   {
     id: "l3",
@@ -53,6 +65,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 11 AM - 5 PM",
     rating: 4.6,
     casesWon: 156,
+    gender: 'female',
+    profileImage: getAvatarUrl("Meera Patel", 'female'),
   },
   // Family Law Lawyers
   {
@@ -67,6 +81,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 10 AM - 6 PM",
     rating: 4.7,
     casesWon: 289,
+    gender: 'female',
+    profileImage: getAvatarUrl("Sunita Reddy", 'female'),
   },
   {
     id: "l5",
@@ -80,6 +96,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Tue-Sat, 10 AM - 7 PM",
     rating: 4.5,
     casesWon: 198,
+    gender: 'male',
+    profileImage: getAvatarUrl("Vikram Singh", 'male'),
   },
   // Criminal Law Lawyers
   {
@@ -94,6 +112,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Sat, 9 AM - 8 PM",
     rating: 4.9,
     casesWon: 412,
+    gender: 'male',
+    profileImage: getAvatarUrl("Arjun Menon", 'male'),
   },
   {
     id: "l7",
@@ -107,6 +127,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 10 AM - 6 PM",
     rating: 4.6,
     casesWon: 267,
+    gender: 'female',
+    profileImage: getAvatarUrl("Neha Gupta", 'female'),
   },
   // Property Disputes Lawyers
   {
@@ -121,6 +143,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 9 AM - 5 PM",
     rating: 4.8,
     casesWon: 356,
+    gender: 'male',
+    profileImage: getAvatarUrl("Suresh Iyer", 'male'),
   },
   {
     id: "l9",
@@ -134,6 +158,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Sat, 10 AM - 6 PM",
     rating: 4.5,
     casesWon: 189,
+    gender: 'female',
+    profileImage: getAvatarUrl("Kavita Joshi", 'female'),
   },
   // Labour Law Lawyers
   {
@@ -148,6 +174,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 10 AM - 7 PM",
     rating: 4.7,
     casesWon: 234,
+    gender: 'male',
+    profileImage: getAvatarUrl("Ramesh Agarwal", 'male'),
   },
   {
     id: "l11",
@@ -161,6 +189,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Tue-Sat, 11 AM - 6 PM",
     rating: 4.4,
     casesWon: 145,
+    gender: 'female',
+    profileImage: getAvatarUrl("Pooja Nair", 'female'),
   },
   // Cyber Crime Lawyers
   {
@@ -175,6 +205,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Sat, 10 AM - 8 PM",
     rating: 4.8,
     casesWon: 112,
+    gender: 'male',
+    profileImage: getAvatarUrl("Aditya Saxena", 'male'),
   },
   {
     id: "l13",
@@ -188,6 +220,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 9 AM - 6 PM",
     rating: 4.6,
     casesWon: 89,
+    gender: 'female',
+    profileImage: getAvatarUrl("Divya Krishnan", 'female'),
   },
   // Corporate Law Lawyers
   {
@@ -202,6 +236,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 9 AM - 7 PM",
     rating: 4.9,
     casesWon: 398,
+    gender: 'male',
+    profileImage: getAvatarUrl("Amit Deshmukh", 'male'),
   },
   {
     id: "l15",
@@ -215,6 +251,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Sat, 10 AM - 6 PM",
     rating: 4.7,
     casesWon: 267,
+    gender: 'female',
+    profileImage: getAvatarUrl("Ritu Kapoor", 'female'),
   },
   // Civil Law Lawyers
   {
@@ -229,6 +267,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 10 AM - 5 PM",
     rating: 4.6,
     casesWon: 298,
+    gender: 'male',
+    profileImage: getAvatarUrl("Manoj Tiwari", 'male'),
   },
   {
     id: "l17",
@@ -242,6 +282,8 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Sat, 9 AM - 6 PM",
     rating: 4.5,
     casesWon: 178,
+    gender: 'female',
+    profileImage: getAvatarUrl("Ananya Das", 'female'),
   },
   // Tax Law Lawyers
   {
@@ -256,6 +298,39 @@ export const dummyLawyers: Lawyer[] = [
     availability: "Mon-Fri, 10 AM - 6 PM",
     rating: 4.8,
     casesWon: 345,
+    gender: 'male',
+    profileImage: getAvatarUrl("Sanjay Bhatt", 'male'),
+  },
+  // Additional lawyers for better coverage
+  {
+    id: "l19",
+    name: "Adv. Shreya Malhotra",
+    city: "Chandigarh",
+    state: "Punjab",
+    specialization: "Family Law",
+    experience: 9,
+    languages: ["English", "Hindi", "Punjabi"],
+    barCouncilId: "PB/5678/2015",
+    availability: "Mon-Fri, 10 AM - 6 PM",
+    rating: 4.6,
+    casesWon: 134,
+    gender: 'female',
+    profileImage: getAvatarUrl("Shreya Malhotra", 'female'),
+  },
+  {
+    id: "l20",
+    name: "Adv. Deepak Verma",
+    city: "Patna",
+    state: "Bihar",
+    specialization: "Criminal Law",
+    experience: 15,
+    languages: ["English", "Hindi", "Bhojpuri"],
+    barCouncilId: "BR/3456/2009",
+    availability: "Mon-Sat, 9 AM - 7 PM",
+    rating: 4.7,
+    casesWon: 278,
+    gender: 'male',
+    profileImage: getAvatarUrl("Deepak Verma", 'male'),
   },
 ];
 
@@ -297,4 +372,8 @@ export const getLawyersFiltered = (
     }
     return match;
   });
+};
+
+export const getAllSpecializations = (): string[] => {
+  return [...new Set(dummyLawyers.map(l => l.specialization))];
 };
