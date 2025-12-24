@@ -15,6 +15,7 @@ import Notifications from "@/components/dashboard/Notifications";
 import LegalDictionary from "@/components/dashboard/LegalDictionary";
 import PrivacySettings from "@/components/dashboard/PrivacySettings";
 import LawyerChat from "@/components/dashboard/LawyerChat";
+import SnehhChatbot from "@/components/dashboard/SnehhChatbot";
 
 type ActiveFeature = "home" | "find" | "nyayscan" | "nyaymail" | "nyaynotice" | "cases" | "saved" | "notifications" | "dictionary" | "privacy" | "chat";
 
@@ -188,6 +189,9 @@ const UserDashboard = () => {
           NyayBuddy provides AI-assisted legal guidance and does not replace professional legal consultation.
         </p>
       </div>
+
+      {/* Snehh AI Chatbot */}
+      <SnehhChatbot />
     </div>
   );
 };
