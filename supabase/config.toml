@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.nyaynotice]
 verify_jwt = false
+
+[functions.snehh-chat]
+verify_jwt = false
