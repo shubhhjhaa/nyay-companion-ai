@@ -25,10 +25,28 @@ interface Lawyer {
   isReal?: boolean;
 }
 
+interface CaseAnalysis {
+  caseType: string;
+  summary: string;
+  isConsumerCase: boolean;
+  requiresFIR: boolean;
+  prerequisites: string[];
+  recommendations: string[];
+  nextSteps: string[];
+  urgencyLevel: string;
+  estimatedTimeframe: string;
+}
+
+interface NyayScanData {
+  caseDescription: string;
+  analysis: CaseAnalysis | null;
+}
+
 interface FindLawyersProps {
   prefillCaseType?: string;
   onClear?: () => void;
   onConnectLawyer?: (lawyerId: string, caseType: string, caseId: string) => void;
+  nyayScanData?: NyayScanData | null;
 }
 
 const getAvatarUrl = (name: string) => {
@@ -37,7 +55,7 @@ const getAvatarUrl = (name: string) => {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${randomColor}&color=fff&size=200&bold=true`;
 };
 
-const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersProps) => {
+const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer, nyayScanData }: FindLawyersProps) => {
   const [step, setStep] = useState<"select" | "results" | "profile">("select");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
@@ -236,6 +254,53 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
         return;
       }
 
+      // Get user profile for name and location
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('full_name, city, state')
+        .eq('id', user.id)
+        .single();
+
+      const userName = userProfile?.full_name || 'User';
+      const userLocation = userProfile?.city && userProfile?.state 
+        ? `${userProfile.city}, ${userProfile.state}` 
+        : '';
+
+      let caseDescription = `Consultation with ${lawyer.name} for ${selectedCaseType || 'General'} matter`;
+      let aiAnalysis = null;
+
+      // If we have NyayScan data, generate AI summary
+      if (nyayScanData?.caseDescription) {
+        toast.loading('Generating detailed case summary with AI...');
+        
+        try {
+          const { data: summaryData, error: summaryError } = await supabase.functions.invoke('generate-case-summary', {
+            body: {
+              caseDescription: nyayScanData.caseDescription,
+              caseType: selectedCaseType,
+              analysis: nyayScanData.analysis,
+              userName,
+              userLocation
+            }
+          });
+
+          if (summaryError) {
+            console.error('Error generating summary:', summaryError);
+          } else if (summaryData?.summary) {
+            caseDescription = summaryData.summary;
+            aiAnalysis = {
+              ...nyayScanData.analysis,
+              generatedSummary: summaryData.summary
+            };
+          }
+        } catch (aiError) {
+          console.error('AI summary generation failed:', aiError);
+          // Continue with basic description if AI fails
+        }
+        
+        toast.dismiss();
+      }
+
       // Create a case for this connection
       const { data: newCase, error: caseError } = await supabase
         .from('cases')
@@ -243,8 +308,9 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
           user_id: user.id,
           lawyer_id: lawyer.id,
           case_type: selectedCaseType || 'General Consultation',
-          description: `Consultation with ${lawyer.name} for ${selectedCaseType || 'General'} matter`,
-          status: 'pending'
+          description: caseDescription,
+          status: 'pending',
+          ai_analysis: aiAnalysis
         })
         .select()
         .single();
@@ -256,13 +322,13 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
         await supabase.from('notifications').insert({
           user_id: lawyer.id,
           title: 'New Case Request',
-          message: `You have a new ${selectedCaseType || 'consultation'} case request`,
+          message: `You have a new ${selectedCaseType || 'consultation'} case request from ${userName}${userLocation ? ` (${userLocation})` : ''}`,
           type: 'case_request',
           case_id: newCase.id
         });
       }
 
-      toast.success(`Connected with ${lawyer.name}!`);
+      toast.success(`Connected with ${lawyer.name}! Detailed case summary sent.`);
       
       if (onConnectLawyer && newCase) {
         onConnectLawyer(lawyer.id, selectedCaseType, newCase.id);

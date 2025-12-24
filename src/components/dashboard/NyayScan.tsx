@@ -22,7 +22,7 @@ interface CaseAnalysis {
 }
 
 interface NyayScanProps {
-  onFindLawyers?: (caseType: string) => void;
+  onFindLawyers?: (caseType: string, caseDescription: string, analysis: CaseAnalysis | null) => void;
 }
 
 const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
@@ -394,7 +394,7 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
                       <p className="text-primary-foreground/80 text-sm">Find experienced lawyers specialized in your case type</p>
                     </div>
                   </div>
-                  <Button variant="gold" onClick={() => onFindLawyers?.(analysis.caseType)}>
+                  <Button variant="gold" onClick={() => onFindLawyers?.(analysis.caseType, caseDescription, analysis)}>
                     Find Lawyers
                   </Button>
                 </div>

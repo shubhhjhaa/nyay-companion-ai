@@ -25,11 +25,29 @@ interface ChatState {
   caseId?: string;
 }
 
+interface CaseAnalysis {
+  caseType: string;
+  summary: string;
+  isConsumerCase: boolean;
+  requiresFIR: boolean;
+  prerequisites: string[];
+  recommendations: string[];
+  nextSteps: string[];
+  urgencyLevel: string;
+  estimatedTimeframe: string;
+}
+
+interface NyayScanData {
+  caseDescription: string;
+  analysis: CaseAnalysis | null;
+}
+
 const UserDashboard = () => {
   const navigate = useNavigate();
   const [activeFeature, setActiveFeature] = useState<ActiveFeature>("home");
   const [prefillCaseType, setPrefillCaseType] = useState<string>("");
   const [chatState, setChatState] = useState<ChatState | null>(null);
+  const [nyayScanData, setNyayScanData] = useState<NyayScanData | null>(null);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -52,8 +70,9 @@ const UserDashboard = () => {
     { id: "privacy" as const, title: "Privacy Settings", description: "Data control & security", icon: Shield, color: "text-muted-foreground", bgColor: "bg-muted" },
   ];
 
-  const handleFindLawyersFromScan = (caseType: string) => {
+  const handleFindLawyersFromScan = (caseType: string, caseDescription: string, analysis: CaseAnalysis | null) => {
     setPrefillCaseType(caseType);
+    setNyayScanData({ caseDescription, analysis });
     setActiveFeature("find");
   };
 
@@ -78,8 +97,12 @@ const UserDashboard = () => {
         return (
           <FindLawyers 
             prefillCaseType={prefillCaseType} 
-            onClear={() => setPrefillCaseType("")} 
+            onClear={() => {
+              setPrefillCaseType("");
+              setNyayScanData(null);
+            }} 
             onConnectLawyer={handleConnectLawyer}
+            nyayScanData={nyayScanData}
           />
         );
       case "nyayscan": 
@@ -87,7 +110,7 @@ const UserDashboard = () => {
       case "nyaymail": 
         return <NyayMail />;
       case "nyaynotice": 
-        return <NyayNotice onFindLawyers={handleFindLawyersFromScan} />;
+        return <NyayNotice onFindLawyers={(caseType) => handleFindLawyersFromScan(caseType, '', null)} />;
       case "cases": 
         return <MyCases onOpenChat={handleOpenChatFromCase} />;
       case "saved": 
