@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { Inbox, MapPin, Calendar, User, Check, X, FileText, Brain } from "lucide-react";
+import { Inbox, MapPin, Calendar, User, Check, X, FileText, Brain, Clock, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -26,6 +29,13 @@ const IncomingRequests = ({ onViewCase }: IncomingRequestsProps) => {
   const [requests, setRequests] = useState<CaseRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [selectedCase, setSelectedCase] = useState<CaseRequest | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const handleViewDetails = (request: CaseRequest) => {
+    setSelectedCase(request);
+    setIsDetailsOpen(true);
+  };
 
   useEffect(() => {
     fetchRequests();
@@ -235,12 +245,12 @@ const IncomingRequests = ({ onViewCase }: IncomingRequestsProps) => {
                       <p className="text-sm text-foreground">{generateAISummary(request)}</p>
                     </div>
 
-                    {request.description && request.description.length > 150 && (
+                    {request.description && request.description.length > 50 && (
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         className="text-xs"
-                        onClick={() => onViewCase?.(request.id)}
+                        onClick={() => handleViewDetails(request)}
                       >
                         <FileText className="w-3 h-3 mr-1" />
                         View Full Details
@@ -279,6 +289,148 @@ const IncomingRequests = ({ onViewCase }: IncomingRequestsProps) => {
       <p className="text-xs text-muted-foreground text-center">
         AI-generated summaries are for quick reference only. Review full case details before accepting.
       </p>
+
+      {/* Case Details Modal */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-nyay-teal" />
+              Case Details
+            </DialogTitle>
+            <DialogDescription>
+              Full case information and AI-generated summary
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedCase && (
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-6">
+                {/* Client Info */}
+                <div className="p-4 rounded-xl bg-muted/50">
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <User className="w-4 h-4 text-nyay-indigo" />
+                    Client Information
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Name:</span>
+                      <p className="font-medium">{selectedCase.user_name || 'Not provided'}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Location:</span>
+                      <p className="font-medium flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {selectedCase.user_location || 'Not provided'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Case Info */}
+                <div className="p-4 rounded-xl bg-nyay-teal/10 border border-nyay-teal/20">
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-nyay-teal" />
+                    Case Information
+                  </h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="bg-nyay-indigo/10 text-nyay-indigo border-nyay-indigo/20">
+                        {selectedCase.case_type}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(selectedCase.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Analysis */}
+                {selectedCase.ai_analysis && (
+                  <div className="p-4 rounded-xl bg-nyay-gold/10 border border-nyay-gold/20">
+                    <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-nyay-gold" />
+                      AI Analysis
+                    </h4>
+                    <div className="space-y-3 text-sm">
+                      {selectedCase.ai_analysis.summary && (
+                        <div>
+                          <span className="text-muted-foreground">Summary:</span>
+                          <p className="mt-1">{selectedCase.ai_analysis.summary}</p>
+                        </div>
+                      )}
+                      {selectedCase.ai_analysis.urgencyLevel && (
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className={`w-4 h-4 ${
+                            selectedCase.ai_analysis.urgencyLevel === 'high' ? 'text-destructive' :
+                            selectedCase.ai_analysis.urgencyLevel === 'medium' ? 'text-nyay-gold' : 'text-nyay-teal'
+                          }`} />
+                          <span className="capitalize">{selectedCase.ai_analysis.urgencyLevel} Priority</span>
+                        </div>
+                      )}
+                      {selectedCase.ai_analysis.estimatedTimeframe && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <span>Estimated: {selectedCase.ai_analysis.estimatedTimeframe}</span>
+                        </div>
+                      )}
+                      {selectedCase.ai_analysis.requiresFIR && (
+                        <Badge variant="destructive" className="text-xs">
+                          FIR Required
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <Separator />
+
+                {/* Full Description */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Full Case Description
+                  </h4>
+                  <div className="p-4 rounded-xl bg-muted/30 border">
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                      {selectedCase.description || 'No description provided'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="gold"
+                    className="flex-1"
+                    onClick={() => {
+                      handleAccept(selectedCase.id);
+                      setIsDetailsOpen(false);
+                    }}
+                    disabled={processingId === selectedCase.id}
+                  >
+                    <Check className="w-4 h-4 mr-2" />
+                    Accept Case
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      handleReject(selectedCase.id);
+                      setIsDetailsOpen(false);
+                    }}
+                    disabled={processingId === selectedCase.id}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Decline
+                  </Button>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
