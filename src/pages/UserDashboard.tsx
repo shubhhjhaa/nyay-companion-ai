@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield } from "lucide-react";
+import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,13 +8,14 @@ import { toast } from "sonner";
 import FindLawyers from "@/components/dashboard/FindLawyers";
 import NyayScan from "@/components/dashboard/NyayScan";
 import NyayMail from "@/components/dashboard/NyayMail";
+import NyayNotice from "@/components/dashboard/NyayNotice";
 import MyCases from "@/components/dashboard/MyCases";
 import SavedLawyers from "@/components/dashboard/SavedLawyers";
 import Notifications from "@/components/dashboard/Notifications";
 import LegalDictionary from "@/components/dashboard/LegalDictionary";
 import PrivacySettings from "@/components/dashboard/PrivacySettings";
 
-type ActiveFeature = "home" | "find" | "nyayscan" | "nyaymail" | "cases" | "saved" | "notifications" | "dictionary" | "privacy";
+type ActiveFeature = "home" | "find" | "nyayscan" | "nyaymail" | "nyaynotice" | "cases" | "saved" | "notifications" | "dictionary" | "privacy";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const UserDashboard = () => {
     { id: "find" as const, title: "Find Lawyers", description: "Search by location and case type", icon: Search, color: "text-nyay-gold", bgColor: "bg-nyay-gold/10" },
     { id: "nyayscan" as const, title: "NyayScan", description: "AI-powered case analyzer", icon: MessageSquareText, color: "text-nyay-teal", bgColor: "bg-nyay-teal/10" },
     { id: "nyaymail" as const, title: "NyayMail", description: "Generate legal emails with AI", icon: Mail, color: "text-nyay-indigo", bgColor: "bg-nyay-indigo/10" },
+    { id: "nyaynotice" as const, title: "NyayNotice", description: "AI Legal Notice Generator", icon: FileText, color: "text-destructive", bgColor: "bg-destructive/10" },
   ];
 
   const userFeatures = [
@@ -51,6 +53,7 @@ const UserDashboard = () => {
       case "find": return <FindLawyers prefillCaseType={prefillCaseType} onClear={() => setPrefillCaseType("")} />;
       case "nyayscan": return <NyayScan onFindLawyers={handleFindLawyersFromScan} />;
       case "nyaymail": return <NyayMail />;
+      case "nyaynotice": return <NyayNotice onFindLawyers={handleFindLawyersFromScan} />;
       case "cases": return <MyCases />;
       case "saved": return <SavedLawyers />;
       case "notifications": return <Notifications />;
