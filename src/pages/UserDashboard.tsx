@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText, MessageCircle } from "lucide-react";
+import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,7 @@ type ActiveFeature = "home" | "find" | "nyayscan" | "nyaymail" | "nyaynotice" | 
 interface ChatState {
   lawyerId: string;
   caseType: string;
+  caseId?: string;
 }
 
 const UserDashboard = () => {
@@ -55,13 +56,18 @@ const UserDashboard = () => {
     setActiveFeature("find");
   };
 
-  const handleConnectLawyer = (lawyerId: string, caseType: string) => {
-    setChatState({ lawyerId, caseType });
+  const handleConnectLawyer = (lawyerId: string, caseType: string, caseId: string) => {
+    setChatState({ lawyerId, caseType, caseId });
     setActiveFeature("chat");
   };
 
   const handleContactFromSaved = (lawyerId: string) => {
     setChatState({ lawyerId, caseType: '' });
+    setActiveFeature("chat");
+  };
+
+  const handleOpenChatFromCase = (caseId: string, lawyerId: string) => {
+    setChatState({ lawyerId, caseType: '', caseId });
     setActiveFeature("chat");
   };
 
@@ -82,7 +88,7 @@ const UserDashboard = () => {
       case "nyaynotice": 
         return <NyayNotice onFindLawyers={handleFindLawyersFromScan} />;
       case "cases": 
-        return <MyCases />;
+        return <MyCases onOpenChat={handleOpenChatFromCase} />;
       case "saved": 
         return <SavedLawyers onContactLawyer={handleContactFromSaved} />;
       case "notifications": 
@@ -102,7 +108,7 @@ const UserDashboard = () => {
             caseType={chatState.caseType}
             onBack={() => {
               setChatState(null);
-              setActiveFeature("find");
+              setActiveFeature("cases");
             }}
             userType="user"
           />
@@ -156,8 +162,10 @@ const UserDashboard = () => {
               <Button variant="ghost" size="icon-sm" onClick={() => {
                 if (activeFeature === "chat") {
                   setChatState(null);
+                  setActiveFeature("cases");
+                } else {
+                  setActiveFeature("home");
                 }
-                setActiveFeature("home");
               }}>
                 <ArrowLeft className="w-4 h-4" />
               </Button>

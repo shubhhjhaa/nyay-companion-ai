@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface FindLawyersProps {
   prefillCaseType?: string;
   onClear?: () => void;
-  onConnectLawyer?: (lawyerId: string, caseType: string) => void;
+  onConnectLawyer?: (lawyerId: string, caseType: string, caseId: string) => void;
 }
 
 const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersProps) => {
@@ -23,6 +23,7 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
   const [lawyers, setLawyers] = useState<Lawyer[]>([]);
   const [selectedLawyer, setSelectedLawyer] = useState<Lawyer | null>(null);
   const [savedLawyerIds, setSavedLawyerIds] = useState<Set<string>>(new Set());
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     if (prefillCaseType) {
@@ -123,12 +124,43 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
     }
   };
 
-  const handleConnect = (lawyer: Lawyer, e?: React.MouseEvent) => {
+  const handleConnect = async (lawyer: Lawyer, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (onConnectLawyer) {
-      onConnectLawyer(lawyer.id, selectedCaseType);
-    } else {
-      toast.success(`Connection request sent to ${lawyer.name}!`);
+    setIsConnecting(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please login to connect with lawyers");
+        setIsConnecting(false);
+        return;
+      }
+
+      // Create a case for this connection
+      const { data: newCase, error: caseError } = await supabase
+        .from('cases')
+        .insert({
+          user_id: user.id,
+          lawyer_id: lawyer.id,
+          case_type: selectedCaseType || 'General Consultation',
+          description: `Consultation with ${lawyer.name} for ${selectedCaseType || 'General'} matter`,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (caseError) throw caseError;
+
+      toast.success(`Connected with ${lawyer.name}!`);
+      
+      if (onConnectLawyer && newCase) {
+        onConnectLawyer(lawyer.id, selectedCaseType, newCase.id);
+      }
+    } catch (error) {
+      console.error('Error connecting with lawyer:', error);
+      toast.error("Failed to create case. Please try again.");
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -218,9 +250,10 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
                 size="lg"
                 className="flex-1"
                 onClick={() => handleConnect(selectedLawyer)}
+                disabled={isConnecting}
               >
                 <MessageCircle className="w-4 h-4 mr-2" />
-                Connect Now
+                {isConnecting ? 'Connecting...' : 'Connect Now'}
               </Button>
             </div>
           </CardContent>
@@ -311,6 +344,7 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
                           size="sm"
                           className="flex-1"
                           onClick={(e) => handleConnect(lawyer, e)}
+                          disabled={isConnecting}
                         >
                           <MessageCircle className="w-3 h-3 mr-1" />
                           Connect
@@ -355,7 +389,7 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer }: FindLawyersP
             <Label>State *</Label>
             <Select value={selectedState} onValueChange={(v) => { setSelectedState(v); setSelectedCity(""); }}>
               <SelectTrigger>
-                <SelectValue placeholder="Select State (optional)" />
+                <SelectValue placeholder="Select State" />
               </SelectTrigger>
               <SelectContent>
                 {indianStates.map((state) => (
