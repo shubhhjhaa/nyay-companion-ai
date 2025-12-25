@@ -105,7 +105,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
             </div>
             
             <Button onClick={onAccountClick} className="bg-blue-900 hover:bg-blue-800 text-white shadow-md">
-              <span>नागरिक पोर्टल</span>
+              <span>Citizen Portal</span>
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </nav>
