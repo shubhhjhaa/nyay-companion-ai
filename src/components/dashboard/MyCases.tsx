@@ -226,8 +226,8 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
             </CardContent>
           </Card>
 
-          {/* Lawyer Details */}
-          {lawyer && (
+          {/* Lawyer Details - only show chat for non-disposed cases */}
+          {lawyer && selectedCase.status !== 'disposed' && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -266,7 +266,7 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
                     Chat
                   </Button>
                   
-                  {selectedCase.status !== 'disposed' && !selectedCase.disposal_requested_at && (
+                  {!selectedCase.disposal_requested_at && (
                     <AlertDialog open={disposeDialogOpen} onOpenChange={setDisposeDialogOpen}>
                       <AlertDialogTrigger asChild>
                         <Button variant="destructive" className="flex-1">
@@ -318,8 +318,26 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
             </Card>
           )}
 
+          {/* Disposed Case Notice */}
+          {selectedCase.status === 'disposed' && (
+            <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+              <CardContent className="py-6 text-center">
+                <Trash2 className="w-12 h-12 text-red-500 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-2">Case Disposed</h3>
+                <p className="text-sm text-red-600 dark:text-red-500 mb-2">
+                  This case has been disposed. No further actions can be taken.
+                </p>
+                {selectedCase.disposal_reason && (
+                  <p className="text-sm text-muted-foreground">
+                    Reason: <span className="font-medium">{DISPOSAL_REASONS.find(r => r.value === selectedCase.disposal_reason)?.label || selectedCase.disposal_reason}</span>
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* AI Analysis Timeline */}
-          {selectedCase.ai_analysis && selectedCase.ai_analysis.nextSteps && (
+          {selectedCase.ai_analysis && selectedCase.ai_analysis.nextSteps && selectedCase.status !== 'disposed' && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">

@@ -368,25 +368,35 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
           </Card>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-4">
-          <Button 
-            variant="gold" 
-            className="flex-1"
-            onClick={() => onOpenChat?.(selectedCase.id, selectedCase.user_id)}
-          >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            Open Chat
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => onViewDocuments?.(selectedCase.id)}
-          >
-            <FileText className="w-4 h-4 mr-2" />
-            View Documents
-          </Button>
-        </div>
+        {/* Actions - only show for non-disposed cases */}
+        {selectedCase.status !== 'disposed' ? (
+          <div className="flex gap-4">
+            <Button 
+              variant="gold" 
+              className="flex-1"
+              onClick={() => onOpenChat?.(selectedCase.id, selectedCase.user_id)}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Open Chat
+            </Button>
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => onViewDocuments?.(selectedCase.id)}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              View Documents
+            </Button>
+          </div>
+        ) : (
+          <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <CardContent className="py-4 text-center">
+              <Trash2 className="w-8 h-8 text-red-500 mx-auto mb-2" />
+              <p className="text-red-700 dark:text-red-400 font-medium">This case has been disposed</p>
+              <p className="text-sm text-red-600 dark:text-red-500">No further actions can be taken on this case.</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
