@@ -95,7 +95,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
           </svg>
           
           {/* Lotus motif - decorative */}
-          <svg className="absolute top-1/4 right-10 w-32 h-32 text-nyay-gold/8 animate-pulse" viewBox="0 0 100 100" fill="none">
+          <svg className="absolute top-1/4 right-10 w-32 h-32 text-nyay-gold/8 animate-float" viewBox="0 0 100 100" fill="none">
             <ellipse cx="50" cy="70" rx="8" ry="20" fill="currentColor" transform="rotate(-30 50 70)" />
             <ellipse cx="50" cy="70" rx="8" ry="20" fill="currentColor" transform="rotate(-15 50 70)" />
             <ellipse cx="50" cy="70" rx="8" ry="20" fill="currentColor" />
@@ -105,7 +105,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
           </svg>
           
           {/* Small lotus - left side */}
-          <svg className="absolute bottom-1/3 left-8 w-20 h-20 text-accent/10" viewBox="0 0 100 100" fill="none">
+          <svg className="absolute bottom-1/3 left-8 w-20 h-20 text-accent/10 animate-float-slow" viewBox="0 0 100 100" fill="none">
             <ellipse cx="50" cy="70" rx="6" ry="15" fill="currentColor" transform="rotate(-25 50 70)" />
             <ellipse cx="50" cy="70" rx="6" ry="15" fill="currentColor" />
             <ellipse cx="50" cy="70" rx="6" ry="15" fill="currentColor" transform="rotate(25 50 70)" />
@@ -285,7 +285,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-nyay-gold/30 to-transparent" />
         
         {/* Decorative lotus - top right */}
-        <svg className="absolute top-12 right-12 w-24 h-24 text-nyay-gold/5" viewBox="0 0 100 100" fill="currentColor">
+        <svg className="absolute top-12 right-12 w-24 h-24 text-nyay-gold/5 animate-float-slow" viewBox="0 0 100 100" fill="currentColor">
           <ellipse cx="50" cy="65" rx="8" ry="22" transform="rotate(-30 50 65)" />
           <ellipse cx="50" cy="65" rx="8" ry="22" transform="rotate(-15 50 65)" />
           <ellipse cx="50" cy="65" rx="8" ry="22" />
@@ -294,7 +294,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
         </svg>
         
         {/* Decorative lotus - bottom left */}
-        <svg className="absolute bottom-12 left-12 w-20 h-20 text-nyay-terracotta/5" viewBox="0 0 100 100" fill="currentColor">
+        <svg className="absolute bottom-12 left-12 w-20 h-20 text-nyay-terracotta/5 animate-float-delayed" viewBox="0 0 100 100" fill="currentColor">
           <ellipse cx="50" cy="65" rx="7" ry="18" transform="rotate(-25 50 65)" />
           <ellipse cx="50" cy="65" rx="7" ry="18" />
           <ellipse cx="50" cy="65" rx="7" ry="18" transform="rotate(25 50 65)" />
@@ -515,14 +515,14 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
         <div className="absolute inset-0 bg-gradient-hero" />
         
         {/* Lotus pattern overlay */}
-        <svg className="absolute left-10 top-1/2 -translate-y-1/2 w-32 h-32 text-white/5" viewBox="0 0 100 100" fill="currentColor">
+        <svg className="absolute left-10 top-1/2 -translate-y-1/2 w-32 h-32 text-white/5 animate-float-slow" viewBox="0 0 100 100" fill="currentColor">
           <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(-35 50 60)" />
           <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(-18 50 60)" />
           <ellipse cx="50" cy="60" rx="10" ry="28" />
           <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(18 50 60)" />
           <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(35 50 60)" />
         </svg>
-        <svg className="absolute right-10 top-1/2 -translate-y-1/2 w-32 h-32 text-white/5 scale-x-[-1]" viewBox="0 0 100 100" fill="currentColor">
+        <svg className="absolute right-10 top-1/2 -translate-y-1/2 w-32 h-32 text-white/5 scale-x-[-1] animate-float-delayed" viewBox="0 0 100 100" fill="currentColor">
           <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(-35 50 60)" />
           <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(-18 50 60)" />
           <ellipse cx="50" cy="60" rx="10" ry="28" />
