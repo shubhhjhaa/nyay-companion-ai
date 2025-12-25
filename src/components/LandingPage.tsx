@@ -71,20 +71,18 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
     <div className="min-h-screen bg-background overflow-hidden">
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col">
-        {/* Background - Formal Legal Pattern */}
-        <div className="absolute inset-0 overflow-hidden bg-gradient-to-b from-slate-50 via-background to-background dark:from-slate-900/50">
-          {/* Subtle pillar pattern - inspired by court architecture */}
+        {/* Background - Warm Indian Pattern */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-nyay-cream via-background to-nyay-sandalwood/20" />
+          
+          {/* Subtle paisley-inspired pattern */}
           <div className="absolute inset-0 opacity-[0.03]" style={{
-            backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 100px, hsl(var(--foreground)) 100px, hsl(var(--foreground)) 102px)`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-8 0-15 7-15 15s7 15 15 15 15-7 15-15-7-15-15-15zm0 25c-5.5 0-10-4.5-10-10s4.5-10 10-10 10 4.5 10 10-4.5 10-10 10z' fill='%23000' fill-opacity='.4'/%3E%3C/svg%3E")`,
           }} />
           
-          {/* Top border stripe - like official documents */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600" />
-          <div className="absolute top-1.5 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900" />
-          
-          {/* Decorative corner elements */}
-          <div className="absolute top-8 left-8 w-16 h-16 border-l-2 border-t-2 border-amber-600/20" />
-          <div className="absolute top-8 right-8 w-16 h-16 border-r-2 border-t-2 border-amber-600/20" />
+          {/* Warm decorative elements */}
+          <div className="absolute top-20 right-20 w-80 h-80 bg-nyay-gold/8 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-nyay-terracotta/5 rounded-full blur-3xl" />
         </div>
 
         {/* Header */}
@@ -92,20 +90,20 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
           <nav className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-amber-600 to-amber-700 shadow-md border border-amber-500/30">
-                  <Scale className="w-6 h-6 text-white" />
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-nyay-indigo to-nyay-indigo-light shadow-lg">
+                  <Scale className="w-6 h-6 text-primary-foreground" />
                 </div>
               </div>
               <div>
-                <span className="text-2xl font-bold text-foreground tracking-tight font-serif">
-                  Nyay<span className="text-amber-600">Buddy</span>
+                <span className="text-2xl font-bold text-foreground tracking-tight">
+                  Nyay<span className="text-nyay-gold">Buddy</span>
                 </span>
-                <p className="text-[10px] text-muted-foreground tracking-widest uppercase font-medium">न्याय सहायता मंच</p>
+                <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Your Legal Companion</p>
               </div>
             </div>
             
-            <Button onClick={onAccountClick} className="bg-blue-900 hover:bg-blue-800 text-white shadow-md">
-              <span>Citizen Portal</span>
+            <Button variant="gold" onClick={onAccountClick} className="shadow-md">
+              <span>Get Started</span>
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </nav>
@@ -116,136 +114,118 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
           <div className="grid lg:grid-cols-2 gap-16 items-center w-full py-12">
             {/* Left Content */}
             <div className="animate-slide-up">
-              {/* Official badge */}
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded border border-amber-600/30 bg-amber-50/50 dark:bg-amber-900/10 text-amber-800 dark:text-amber-500 text-sm font-medium mb-6">
+              {/* Warm badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-nyay-gold/15 border border-nyay-gold/30 text-nyay-terracotta text-sm font-medium mb-6">
                 <Scale className="w-4 h-4" />
-                <span className="font-medium">भारतीय नागरिकों के लिए निःशुल्क कानूनी सहायता</span>
+                <span>Trusted by 10,000+ Indians</span>
               </div>
               
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] mb-6 font-serif">
-                Know Your{" "}
-                <span className="text-amber-600">Legal Rights</span>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] mb-6">
+                Your Legal Rights,{" "}
+                <span className="text-nyay-gold">Simplified</span>
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl">
-                Free legal guidance for every Indian citizen. Understand your rights under Indian law, 
-                get AI-powered case analysis, and connect with verified advocates.
+                Don't let legal confusion hold you back. NyayBuddy understands your problem, 
+                explains your rights in simple Hindi or English, and connects you with verified advocates.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <Button onClick={onAccountClick} size="lg" className="bg-amber-600 hover:bg-amber-700 text-white shadow-lg group">
+                <Button variant="hero" size="xl" onClick={onAccountClick} className="group shadow-lg">
                   <Scale className="w-5 h-5 mr-2" />
-                  <span>Start Legal Consultation</span>
+                  <span>Analyze My Case Free</span>
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
-                <Button variant="outline" size="lg" onClick={onAccountClick} className="border-2 border-blue-900/30 text-blue-900 dark:text-blue-400 hover:bg-blue-900/5">
+                <Button variant="outline" size="lg" onClick={onAccountClick} className="border-2">
                   <Users className="w-4 h-4 mr-2" />
                   Find an Advocate
                 </Button>
               </div>
 
-              {/* Official-style trust indicators */}
-              <div className="grid grid-cols-3 gap-4 p-4 rounded-lg border border-border bg-muted/30">
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <ShieldCheck className="w-6 h-6 text-blue-900 dark:text-blue-400" />
-                  </div>
-                  <p className="text-xs font-medium text-foreground">Data Protected</p>
-                  <p className="text-[10px] text-muted-foreground">End-to-End Encrypted</p>
+              {/* Trust indicators */}
+              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-accent" />
+                  <span>100% Confidential</span>
                 </div>
-                <div className="text-center border-x border-border">
-                  <div className="flex justify-center mb-2">
-                    <Award className="w-6 h-6 text-amber-600" />
-                  </div>
-                  <p className="text-xs font-medium text-foreground">Bar Council</p>
-                  <p className="text-[10px] text-muted-foreground">Verified Advocates</p>
+                <div className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-nyay-gold" />
+                  <span>Bar Council Verified</span>
                 </div>
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <Clock className="w-6 h-6 text-green-700 dark:text-green-500" />
-                  </div>
-                  <p className="text-xs font-medium text-foreground">24/7 Available</p>
-                  <p className="text-[10px] text-muted-foreground">AI Assistance</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-nyay-terracotta" />
+                  <span>24/7 AI Support</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Content - Legal Document Style Card */}
+            {/* Right Content - Case Analysis Preview */}
             <div className="relative animate-slide-up" style={{ animationDelay: "0.2s" }}>
               <div className="relative">
-                {/* Main Card - Styled like a legal document */}
-                <Card className="bg-card border-2 border-amber-600/20 shadow-xl overflow-hidden">
-                  {/* Document header stripe */}
-                  <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 px-6 py-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Scale className="w-5 h-5 text-amber-400" />
-                        <span className="text-white font-medium text-sm tracking-wide">CASE ANALYSIS REPORT</span>
-                      </div>
-                      <span className="text-amber-400 text-xs font-mono">REF: NYB-2024</span>
+                {/* Main Card */}
+                <Card className="bg-card border border-border shadow-xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-nyay-indigo to-nyay-indigo-light px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="w-5 h-5 text-nyay-gold" />
+                      <span className="text-primary-foreground font-semibold">AI Case Analysis</span>
                     </div>
                   </div>
                   
                   <CardContent className="p-6">
-                    {/* Matter details */}
-                    <div className="mb-5 pb-4 border-b border-dashed border-border">
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Subject Matter</p>
-                      <p className="text-foreground font-medium">"Recovery of Security Deposit from Landlord"</p>
+                    {/* Sample Issue */}
+                    <div className="mb-5 pb-4 border-b border-border">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Your Issue</p>
+                      <p className="text-foreground">"My landlord is not returning my security deposit..."</p>
                     </div>
 
-                    {/* Analysis sections */}
+                    {/* Analysis Results */}
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
-                          <CheckCircle className="w-4 h-4 text-green-700 dark:text-green-500" />
-                        </div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-accent/10 border border-accent/20">
+                        <CheckCircle className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-sm font-medium text-foreground">Prima Facie: Strong Case</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Covered under Rent Control Act & Consumer Protection Act, 2019</p>
+                          <p className="text-sm font-medium text-foreground">Strong Case Identified</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Consumer Protection Act applies</p>
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-                          <Building2 className="w-4 h-4 text-amber-700 dark:text-amber-500" />
-                        </div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-nyay-gold/10 border border-nyay-gold/20">
+                        <Building2 className="w-5 h-5 text-nyay-gold shrink-0 mt-0.5" />
                         <div>
                           <p className="text-sm font-medium text-foreground">Relevant Authority</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Rent Controller / District Consumer Forum</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">District Consumer Forum</p>
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                          <FileCheck className="w-4 h-4 text-blue-700 dark:text-blue-500" />
-                        </div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-nyay-terracotta/10 border border-nyay-terracotta/20">
+                        <Gavel className="w-5 h-5 text-nyay-terracotta shrink-0 mt-0.5" />
                         <div>
                           <p className="text-sm font-medium text-foreground">Recommended Action</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Issue Legal Notice under Section 138 NI Act</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Send a legal notice first</p>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="mt-5 pt-4 border-t border-dashed border-border">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Generated by NyayBuddy AI</span>
-                        <span className="font-mono">सत्यमेव जयते</span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Citizens helped badge */}
-                <div className="absolute -top-3 -right-3 bg-amber-600 text-white shadow-lg rounded px-3 py-2">
-                  <p className="text-xs font-bold">10,000+</p>
-                  <p className="text-[10px] opacity-90">Citizens Helped</p>
+                {/* Floating badges */}
+                <div className="absolute -top-3 -right-3 bg-nyay-gold text-foreground shadow-lg rounded-xl px-4 py-2 animate-pulse-glow">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 fill-current" />
+                    <div>
+                      <p className="text-xs font-bold">4.9/5 Rating</p>
+                      <p className="text-[10px] opacity-80">2000+ Reviews</p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Free service badge */}
-                <div className="absolute -bottom-3 -left-3 bg-green-700 text-white shadow-lg rounded px-3 py-2">
-                  <p className="text-xs font-bold">100% Free</p>
-                  <p className="text-[10px] opacity-90">No Hidden Charges</p>
+                <div className="absolute -bottom-3 -left-3 bg-card shadow-lg rounded-xl px-4 py-2 border border-border">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-accent" />
+                    <div>
+                      <p className="text-xs font-bold text-foreground">100% Free</p>
+                      <p className="text-[10px] text-muted-foreground">No Hidden Charges</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -253,12 +233,12 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
         </div>
 
         {/* Stats Bar */}
-        <div className="relative z-10 border-t border-border bg-card/50 backdrop-blur-sm">
+        <div className="relative z-10 border-t border-border bg-card/60 backdrop-blur-sm">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-8">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <p className="text-2xl md:text-3xl font-bold text-gradient-hero">{stat.number}</p>
+                  <p className="text-2xl md:text-3xl font-bold text-nyay-indigo">{stat.number}</p>
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
@@ -269,17 +249,15 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
 
       {/* Features Section */}
       <section className="py-24 bg-gradient-subtle relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(230_65%_25%_/_0.03)_0%,_transparent_70%)]" />
-        
         <div className="container mx-auto px-4 relative">
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-nyay-teal/10 text-nyay-teal text-sm font-medium mb-4">
-              <Building2 className="w-4 h-4" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-nyay-gold/15 text-nyay-terracotta text-sm font-medium mb-4">
+              <Gavel className="w-4 h-4" />
               <span>Comprehensive Legal Tools</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
               Everything You Need for{" "}
-              <span className="text-gradient-hero">Legal Help</span>
+              <span className="text-nyay-gold">Legal Help</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               From understanding your case to drafting legal notices, NyayBuddy has all the tools to fight for your rights.
@@ -290,12 +268,10 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
             {features.map((feature, index) => (
               <Card
                 key={feature.title}
-                className="group bg-card hover:bg-card/80 border-2 border-transparent hover:border-nyay-gold/30 shadow-card hover:shadow-xl transition-all duration-500 hover:-translate-y-2 animate-slide-up overflow-hidden"
+                className="group bg-card hover:bg-card/80 border border-border hover:border-nyay-gold/30 shadow-card hover:shadow-xl transition-all duration-500 hover:-translate-y-2 animate-slide-up overflow-hidden"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-6 relative">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-nyay-gold/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
                   <div className={`w-14 h-14 rounded-2xl ${feature.bgColor} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
                     <feature.icon className={`w-7 h-7 ${feature.color}`} />
                   </div>
@@ -315,7 +291,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
 
       {/* How It Works */}
       <section className="py-24 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-nyay-indigo/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-nyay-gold/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative">
           <div className="text-center mb-16">
@@ -328,12 +304,12 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-3 gap-8 relative">
               {/* Connection Line */}
-              <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-1 bg-gradient-to-r from-nyay-indigo via-nyay-gold to-nyay-teal rounded-full" />
+              <div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-1 bg-gradient-to-r from-nyay-indigo via-nyay-gold to-accent rounded-full" />
               
               {[
                 { step: "1", title: "Describe Your Problem", desc: "Tell us about your legal issue in simple words — Hindi or English, we understand both.", icon: MessageSquareText, color: "from-nyay-indigo to-nyay-indigo-light" },
                 { step: "2", title: "AI Analyzes Your Case", desc: "Our legal AI reviews your situation against Indian laws and suggests the best course of action.", icon: BookOpen, color: "from-nyay-gold to-nyay-gold-light" },
-                { step: "3", title: "Take Action", desc: "Send legal notices, connect with lawyers, or file complaints — all with guided assistance.", icon: Gavel, color: "from-nyay-teal to-nyay-teal-light" },
+                { step: "3", title: "Take Action", desc: "Send legal notices, connect with advocates, or file complaints — all with guided assistance.", icon: Gavel, color: "from-accent to-nyay-teal-light" },
               ].map((item, index) => (
                 <div key={item.step} className="relative text-center animate-slide-up" style={{ animationDelay: `${index * 0.15}s` }}>
                   <div className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${item.color} text-primary-foreground flex items-center justify-center mx-auto mb-6 shadow-xl relative z-10`}>
@@ -358,12 +334,12 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
               Trusted by Thousands
             </h2>
-            <p className="text-muted-foreground text-lg">Real stories from real people</p>
+            <p className="text-muted-foreground text-lg">Real stories from real people across India</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-card border-2 hover:border-nyay-gold/30 transition-colors animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+              <Card key={index} className="bg-card border border-border hover:border-nyay-gold/30 transition-colors animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
                 <CardContent className="p-6">
                   <div className="flex gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -372,12 +348,14 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
                   </div>
                   <p className="text-foreground mb-6 leading-relaxed">"{testimonial.text}"</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-hero flex items-center justify-center text-primary-foreground font-bold">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-nyay-indigo to-nyay-gold flex items-center justify-center text-primary-foreground font-bold">
                       {testimonial.name.charAt(0)}
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">{testimonial.name}</p>
-                      <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> {testimonial.location}
+                      </p>
                     </div>
                   </div>
                 </CardContent>

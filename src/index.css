@@ -6,63 +6,65 @@
 
 @layer base {
   :root {
-    /* NyayBuddy Legal Tech Color Palette */
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    /* NyayBuddy - Warm Indian Legal Palette */
+    --background: 40 30% 98%;
+    --foreground: 20 20% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 40 25% 99%;
+    --card-foreground: 20 20% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: 40 25% 99%;
+    --popover-foreground: 20 20% 15%;
 
-    /* Deep Indigo - Trust & Authority */
-    --primary: 230 65% 25%;
-    --primary-foreground: 210 40% 98%;
+    /* Deep Maroon - Traditional Legal */
+    --primary: 350 45% 30%;
+    --primary-foreground: 40 30% 98%;
 
-    /* Warm Gold - Premium & Hope */
-    --secondary: 38 92% 50%;
-    --secondary-foreground: 222 47% 11%;
+    /* Warm Saffron - Indian Heritage */
+    --secondary: 28 85% 55%;
+    --secondary-foreground: 20 20% 15%;
 
-    /* Teal - Modern Tech */
-    --accent: 175 60% 40%;
-    --accent-foreground: 210 40% 98%;
+    /* Sage Green - Balance & Growth */
+    --accent: 150 30% 40%;
+    --accent-foreground: 40 30% 98%;
 
-    --muted: 210 20% 94%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 35 20% 93%;
+    --muted-foreground: 20 10% 45%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 40 30% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 230 65% 25%;
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 350 45% 30%;
 
     --radius: 0.75rem;
 
-    /* Custom NyayBuddy tokens */
-    --nyay-indigo: 230 65% 25%;
-    --nyay-indigo-light: 230 65% 35%;
-    --nyay-indigo-dark: 230 65% 18%;
-    --nyay-gold: 38 92% 50%;
-    --nyay-gold-light: 38 92% 65%;
-    --nyay-teal: 175 60% 40%;
-    --nyay-teal-light: 175 60% 55%;
-    --nyay-cream: 45 40% 96%;
-    --nyay-warm-gray: 30 10% 60%;
+    /* Custom NyayBuddy tokens - Warm Indian aesthetic */
+    --nyay-indigo: 350 45% 30%;
+    --nyay-indigo-light: 350 40% 45%;
+    --nyay-indigo-dark: 350 50% 22%;
+    --nyay-gold: 28 85% 55%;
+    --nyay-gold-light: 35 90% 65%;
+    --nyay-teal: 150 30% 40%;
+    --nyay-teal-light: 150 35% 55%;
+    --nyay-cream: 40 40% 96%;
+    --nyay-warm-gray: 25 15% 55%;
+    --nyay-terracotta: 15 60% 50%;
+    --nyay-sandalwood: 35 30% 75%;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(230 65% 25%) 0%, hsl(230 65% 35%) 50%, hsl(175 60% 40%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(38 92% 65%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(210 20% 98%) 0%, hsl(210 20% 94%) 100%);
+    /* Gradients - Warm and inviting */
+    --gradient-hero: linear-gradient(135deg, hsl(350 45% 30%) 0%, hsl(350 40% 40%) 50%, hsl(28 85% 55%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(28 85% 55%) 0%, hsl(35 90% 65%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(40 25% 99%) 0%, hsl(40 30% 97%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(40 30% 98%) 0%, hsl(35 25% 94%) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 2px 8px -2px hsl(230 65% 25% / 0.08);
-    --shadow-md: 0 4px 16px -4px hsl(230 65% 25% / 0.12);
-    --shadow-lg: 0 8px 32px -8px hsl(230 65% 25% / 0.16);
-    --shadow-glow: 0 0 40px hsl(38 92% 50% / 0.3);
-    --shadow-card: 0 4px 24px -8px hsl(230 65% 25% / 0.1);
+    /* Shadows - Softer */
+    --shadow-sm: 0 2px 8px -2px hsl(20 20% 20% / 0.06);
+    --shadow-md: 0 4px 16px -4px hsl(20 20% 20% / 0.1);
+    --shadow-lg: 0 8px 32px -8px hsl(20 20% 20% / 0.14);
+    --shadow-glow: 0 0 40px hsl(28 85% 55% / 0.25);
+    --shadow-card: 0 4px 24px -8px hsl(20 20% 20% / 0.08);
 
     /* Sidebar */
     --sidebar-background: 230 65% 25%;
@@ -126,7 +128,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Playfair Display', serif;
   }
 }
 
