@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
-import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText, Sun, Moon } from "lucide-react";
+import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText, Sun, Moon, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +50,25 @@ const UserDashboard = () => {
   const [prefillCaseType, setPrefillCaseType] = useState<string>("");
   const [chatState, setChatState] = useState<ChatState | null>(null);
   const [nyayScanData, setNyayScanData] = useState<NyayScanData | null>(null);
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.full_name) {
+          setUserName(profile.full_name);
+        }
+      }
+    };
+    fetchUserProfile();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -142,8 +161,19 @@ const UserDashboard = () => {
       default:
         return (
           <>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to NyayBuddy</h1>
-            <p className="text-muted-foreground mb-8">How can we help you today?</p>
+            {userName && (
+              <div className="mb-6 flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-hero flex items-center justify-center">
+                  <User className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Welcome back,</p>
+                  <h1 className="text-4xl md:text-5xl font-bold text-foreground">{userName}</h1>
+                </div>
+              </div>
+            )}
+            <h2 className="text-2xl font-semibold text-foreground mb-2">How can we help you today?</h2>
+            <p className="text-muted-foreground mb-8">Choose a service to get started</p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {mainFeatures.map((feature) => (
