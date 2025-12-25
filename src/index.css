@@ -6,114 +6,112 @@
 
 @layer base {
   :root {
-    /* NyayBuddy - Forest Green & Cream Palette */
-    --background: 40 35% 97%;
-    --foreground: 150 30% 15%;
+    /* NyayBuddy Legal Tech Color Palette */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: 40 30% 99%;
-    --card-foreground: 150 30% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 40 30% 99%;
-    --popover-foreground: 150 30% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Deep Forest Green - Trust & Wisdom */
-    --primary: 155 45% 25%;
-    --primary-foreground: 40 35% 97%;
+    /* Deep Indigo - Trust & Authority */
+    --primary: 230 65% 25%;
+    --primary-foreground: 210 40% 98%;
 
-    /* Warm Terracotta - Indian Earth */
-    --secondary: 18 55% 50%;
-    --secondary-foreground: 40 35% 97%;
+    /* Warm Gold - Premium & Hope */
+    --secondary: 38 92% 50%;
+    --secondary-foreground: 222 47% 11%;
 
-    /* Soft Sage - Balance */
-    --accent: 145 25% 45%;
-    --accent-foreground: 40 35% 97%;
+    /* Teal - Modern Tech */
+    --accent: 175 60% 40%;
+    --accent-foreground: 210 40% 98%;
 
-    --muted: 40 20% 92%;
-    --muted-foreground: 150 15% 40%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 16% 47%;
 
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 40 35% 97%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
-    --ring: 155 45% 25%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 230 65% 25%;
 
     --radius: 0.75rem;
 
-    /* Custom NyayBuddy tokens - Forest & Earth */
-    --nyay-indigo: 155 45% 25%;
-    --nyay-indigo-light: 150 40% 38%;
-    --nyay-indigo-dark: 155 50% 18%;
-    --nyay-gold: 18 55% 50%;
-    --nyay-gold-light: 22 60% 60%;
-    --nyay-teal: 145 25% 45%;
-    --nyay-teal-light: 145 30% 55%;
-    --nyay-cream: 40 40% 95%;
-    --nyay-warm-gray: 40 10% 50%;
-    --nyay-terracotta: 18 55% 50%;
-    --nyay-sandalwood: 35 25% 75%;
+    /* Custom NyayBuddy tokens */
+    --nyay-indigo: 230 65% 25%;
+    --nyay-indigo-light: 230 65% 35%;
+    --nyay-indigo-dark: 230 65% 18%;
+    --nyay-gold: 38 92% 50%;
+    --nyay-gold-light: 38 92% 65%;
+    --nyay-teal: 175 60% 40%;
+    --nyay-teal-light: 175 60% 55%;
+    --nyay-cream: 45 40% 96%;
+    --nyay-warm-gray: 30 10% 60%;
 
-    /* Gradients - Earthy & Natural */
-    --gradient-hero: linear-gradient(135deg, hsl(155 45% 25%) 0%, hsl(150 40% 35%) 50%, hsl(145 25% 45%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(18 55% 50%) 0%, hsl(22 60% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(40 30% 99%) 0%, hsl(40 35% 96%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(40 35% 97%) 0%, hsl(40 30% 94%) 100%);
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(230 65% 25%) 0%, hsl(230 65% 35%) 50%, hsl(175 60% 40%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(38 92% 65%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(210 20% 98%) 0%, hsl(210 20% 94%) 100%);
 
-    /* Shadows - Warm & Natural */
-    --shadow-sm: 0 2px 8px -2px hsl(150 30% 20% / 0.08);
-    --shadow-md: 0 4px 16px -4px hsl(150 30% 20% / 0.12);
-    --shadow-lg: 0 8px 32px -8px hsl(150 30% 20% / 0.16);
-    --shadow-glow: 0 0 40px hsl(155 45% 30% / 0.25);
-    --shadow-card: 0 4px 24px -8px hsl(150 30% 20% / 0.1);
+    /* Shadows */
+    --shadow-sm: 0 2px 8px -2px hsl(230 65% 25% / 0.08);
+    --shadow-md: 0 4px 16px -4px hsl(230 65% 25% / 0.12);
+    --shadow-lg: 0 8px 32px -8px hsl(230 65% 25% / 0.16);
+    --shadow-glow: 0 0 40px hsl(38 92% 50% / 0.3);
+    --shadow-card: 0 4px 24px -8px hsl(230 65% 25% / 0.1);
 
-    /* Sidebar - Deep Forest */
-    --sidebar-background: 155 45% 18%;
-    --sidebar-foreground: 40 35% 97%;
-    --sidebar-primary: 18 55% 55%;
-    --sidebar-primary-foreground: 155 45% 15%;
-    --sidebar-accent: 155 40% 28%;
-    --sidebar-accent-foreground: 40 35% 97%;
-    --sidebar-border: 155 40% 25%;
-    --sidebar-ring: 18 55% 55%;
+    /* Sidebar */
+    --sidebar-background: 230 65% 25%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 230 65% 35%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 230 65% 35%;
+    --sidebar-ring: 38 92% 50%;
   }
 
   .dark {
-    --background: 155 40% 8%;
-    --foreground: 40 35% 97%;
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
 
-    --card: 155 40% 12%;
-    --card-foreground: 40 35% 97%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 155 40% 12%;
-    --popover-foreground: 40 35% 97%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 145 40% 50%;
-    --primary-foreground: 155 40% 10%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 222 47% 11%;
 
-    --secondary: 18 50% 45%;
-    --secondary-foreground: 40 35% 97%;
+    --secondary: 230 65% 35%;
+    --secondary-foreground: 210 40% 98%;
 
-    --accent: 145 30% 40%;
-    --accent-foreground: 155 40% 10%;
+    --accent: 175 60% 50%;
+    --accent-foreground: 222 47% 11%;
 
-    --muted: 155 30% 18%;
-    --muted-foreground: 150 15% 60%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --destructive: 0 63% 35%;
-    --destructive-foreground: 40 35% 97%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 155 30% 18%;
-    --input: 155 30% 18%;
-    --ring: 145 40% 50%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 38 92% 50%;
 
-    --sidebar-background: 155 40% 8%;
-    --sidebar-foreground: 40 35% 97%;
-    --sidebar-primary: 18 55% 55%;
-    --sidebar-primary-foreground: 155 40% 10%;
-    --sidebar-accent: 155 40% 15%;
-    --sidebar-accent-foreground: 40 35% 97%;
-    --sidebar-border: 155 30% 18%;
-    --sidebar-ring: 18 55% 55%;
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 222 47% 15%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 38 92% 50%;
   }
 }
 
@@ -128,7 +126,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }
 
@@ -186,18 +184,6 @@
   .animate-pulse-glow {
     animation: pulseGlow 2s ease-in-out infinite;
   }
-
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .animate-float-slow {
-    animation: floatSlow 8s ease-in-out infinite;
-  }
-
-  .animate-float-delayed {
-    animation: float 6s ease-in-out infinite 2s;
-  }
 }
 
 @keyframes fadeIn {
@@ -233,31 +219,10 @@
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px hsl(155 45% 30% / 0.3);
+    box-shadow: 0 0 20px hsl(38 92% 50% / 0.3);
   }
   50% {
-    box-shadow: 0 0 40px hsl(155 45% 30% / 0.5);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-10px) rotate(2deg);
-  }
-}
-
-@keyframes floatSlow {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  33% {
-    transform: translateY(-8px) rotate(1deg);
-  }
-  66% {
-    transform: translateY(-4px) rotate(-1deg);
+    box-shadow: 0 0 40px hsl(38 92% 50% / 0.5);
   }
 }
 
