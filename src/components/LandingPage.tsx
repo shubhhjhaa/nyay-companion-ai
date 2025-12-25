@@ -75,12 +75,44 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-nyay-cream via-background to-nyay-sandalwood/20" />
           
-          {/* Subtle paisley-inspired pattern */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-8 0-15 7-15 15s7 15 15 15 15-7 15-15-7-15-15-15zm0 25c-5.5 0-10-4.5-10-10s4.5-10 10-10 10 4.5 10 10-4.5 10-10 10z' fill='%23000' fill-opacity='.4'/%3E%3C/svg%3E")`,
-          }} />
+          {/* Rangoli-inspired corner pattern - Top Left */}
+          <svg className="absolute top-0 left-0 w-64 h-64 text-nyay-gold/10" viewBox="0 0 200 200" fill="none">
+            <circle cx="0" cy="0" r="150" stroke="currentColor" strokeWidth="1" />
+            <circle cx="0" cy="0" r="120" stroke="currentColor" strokeWidth="1" />
+            <circle cx="0" cy="0" r="90" stroke="currentColor" strokeWidth="1" />
+            <path d="M0 0 L100 50 L50 100 Z" fill="currentColor" opacity="0.3" />
+            <path d="M0 60 Q30 30 60 0" stroke="currentColor" strokeWidth="2" fill="none" />
+            <path d="M0 90 Q45 45 90 0" stroke="currentColor" strokeWidth="1.5" fill="none" />
+          </svg>
           
-          {/* Warm decorative elements */}
+          {/* Rangoli-inspired corner pattern - Bottom Right */}
+          <svg className="absolute bottom-0 right-0 w-64 h-64 text-nyay-terracotta/10 rotate-180" viewBox="0 0 200 200" fill="none">
+            <circle cx="0" cy="0" r="150" stroke="currentColor" strokeWidth="1" />
+            <circle cx="0" cy="0" r="120" stroke="currentColor" strokeWidth="1" />
+            <circle cx="0" cy="0" r="90" stroke="currentColor" strokeWidth="1" />
+            <path d="M0 0 L100 50 L50 100 Z" fill="currentColor" opacity="0.3" />
+            <path d="M0 60 Q30 30 60 0" stroke="currentColor" strokeWidth="2" fill="none" />
+          </svg>
+          
+          {/* Lotus motif - decorative */}
+          <svg className="absolute top-1/4 right-10 w-32 h-32 text-nyay-gold/8 animate-pulse" viewBox="0 0 100 100" fill="none">
+            <ellipse cx="50" cy="70" rx="8" ry="20" fill="currentColor" transform="rotate(-30 50 70)" />
+            <ellipse cx="50" cy="70" rx="8" ry="20" fill="currentColor" transform="rotate(-15 50 70)" />
+            <ellipse cx="50" cy="70" rx="8" ry="20" fill="currentColor" />
+            <ellipse cx="50" cy="70" rx="8" ry="20" fill="currentColor" transform="rotate(15 50 70)" />
+            <ellipse cx="50" cy="70" rx="8" ry="20" fill="currentColor" transform="rotate(30 50 70)" />
+            <circle cx="50" cy="75" r="6" fill="currentColor" opacity="0.5" />
+          </svg>
+          
+          {/* Small lotus - left side */}
+          <svg className="absolute bottom-1/3 left-8 w-20 h-20 text-accent/10" viewBox="0 0 100 100" fill="none">
+            <ellipse cx="50" cy="70" rx="6" ry="15" fill="currentColor" transform="rotate(-25 50 70)" />
+            <ellipse cx="50" cy="70" rx="6" ry="15" fill="currentColor" />
+            <ellipse cx="50" cy="70" rx="6" ry="15" fill="currentColor" transform="rotate(25 50 70)" />
+            <circle cx="50" cy="72" r="4" fill="currentColor" opacity="0.5" />
+          </svg>
+          
+          {/* Warm decorative glow elements */}
           <div className="absolute top-20 right-20 w-80 h-80 bg-nyay-gold/8 rounded-full blur-3xl" />
           <div className="absolute bottom-20 left-20 w-96 h-96 bg-nyay-terracotta/5 rounded-full blur-3xl" />
         </div>
@@ -248,7 +280,26 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-gradient-subtle relative">
+      <section className="py-24 bg-gradient-subtle relative overflow-hidden">
+        {/* Rangoli border decoration */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-nyay-gold/30 to-transparent" />
+        
+        {/* Decorative lotus - top right */}
+        <svg className="absolute top-12 right-12 w-24 h-24 text-nyay-gold/5" viewBox="0 0 100 100" fill="currentColor">
+          <ellipse cx="50" cy="65" rx="8" ry="22" transform="rotate(-30 50 65)" />
+          <ellipse cx="50" cy="65" rx="8" ry="22" transform="rotate(-15 50 65)" />
+          <ellipse cx="50" cy="65" rx="8" ry="22" />
+          <ellipse cx="50" cy="65" rx="8" ry="22" transform="rotate(15 50 65)" />
+          <ellipse cx="50" cy="65" rx="8" ry="22" transform="rotate(30 50 65)" />
+        </svg>
+        
+        {/* Decorative lotus - bottom left */}
+        <svg className="absolute bottom-12 left-12 w-20 h-20 text-nyay-terracotta/5" viewBox="0 0 100 100" fill="currentColor">
+          <ellipse cx="50" cy="65" rx="7" ry="18" transform="rotate(-25 50 65)" />
+          <ellipse cx="50" cy="65" rx="7" ry="18" />
+          <ellipse cx="50" cy="65" rx="7" ry="18" transform="rotate(25 50 65)" />
+        </svg>
+        
         <div className="container mx-auto px-4 relative">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-nyay-gold/15 text-nyay-terracotta text-sm font-medium mb-4">
@@ -367,6 +418,22 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
 
       {/* Meet Snehh Section */}
       <section className="py-24 bg-gradient-to-br from-nyay-teal/5 via-background to-nyay-gold/5 relative overflow-hidden">
+        {/* Decorative rangoli corners */}
+        <svg className="absolute top-0 left-0 w-40 h-40 text-nyay-gold/8" viewBox="0 0 100 100" fill="none">
+          <path d="M0 0 Q50 20 20 50 Q-10 80 0 100" stroke="currentColor" strokeWidth="0.5" />
+          <path d="M0 0 Q30 30 0 60" stroke="currentColor" strokeWidth="0.5" />
+          <circle cx="10" cy="10" r="3" fill="currentColor" />
+          <circle cx="5" cy="25" r="2" fill="currentColor" />
+          <circle cx="25" cy="5" r="2" fill="currentColor" />
+        </svg>
+        <svg className="absolute bottom-0 right-0 w-40 h-40 text-accent/8 rotate-180" viewBox="0 0 100 100" fill="none">
+          <path d="M0 0 Q50 20 20 50 Q-10 80 0 100" stroke="currentColor" strokeWidth="0.5" />
+          <path d="M0 0 Q30 30 0 60" stroke="currentColor" strokeWidth="0.5" />
+          <circle cx="10" cy="10" r="3" fill="currentColor" />
+          <circle cx="5" cy="25" r="2" fill="currentColor" />
+          <circle cx="25" cy="5" r="2" fill="currentColor" />
+        </svg>
+        
         <div className="absolute top-20 right-20 w-64 h-64 bg-nyay-gold/10 rounded-full blur-3xl" />
         <div className="absolute bottom-20 left-20 w-48 h-48 bg-nyay-teal/10 rounded-full blur-3xl" />
         
@@ -446,7 +513,22 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
       {/* CTA Section */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M20 0L0 20h40z\'/%3E%3C/g%3E%3C/svg%3E')]" />
+        
+        {/* Lotus pattern overlay */}
+        <svg className="absolute left-10 top-1/2 -translate-y-1/2 w-32 h-32 text-white/5" viewBox="0 0 100 100" fill="currentColor">
+          <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(-35 50 60)" />
+          <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(-18 50 60)" />
+          <ellipse cx="50" cy="60" rx="10" ry="28" />
+          <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(18 50 60)" />
+          <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(35 50 60)" />
+        </svg>
+        <svg className="absolute right-10 top-1/2 -translate-y-1/2 w-32 h-32 text-white/5 scale-x-[-1]" viewBox="0 0 100 100" fill="currentColor">
+          <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(-35 50 60)" />
+          <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(-18 50 60)" />
+          <ellipse cx="50" cy="60" rx="10" ry="28" />
+          <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(18 50 60)" />
+          <ellipse cx="50" cy="60" rx="10" ry="28" transform="rotate(35 50 60)" />
+        </svg>
         
         <div className="container mx-auto px-4 text-center relative">
           <div className="max-w-3xl mx-auto">
