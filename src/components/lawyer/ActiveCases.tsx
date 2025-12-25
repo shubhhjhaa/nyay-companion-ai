@@ -393,6 +393,41 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Disposal Confirmation Dialog - moved outside flex container */}
+      <AlertDialog open={disposeConfirmOpen} onOpenChange={setDisposeConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Case Disposal</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div>
+                {caseToDispose && (
+                  <>
+                    Are you sure you want to dispose case #{caseToDispose.id.slice(0, 8).toUpperCase()}?
+                    <br /><br />
+                    <strong>Reason:</strong> {DISPOSAL_REASONS[caseToDispose.disposal_reason || ''] || caseToDispose.disposal_reason}
+                    <br /><br />
+                    This action will mark the case as disposed and notify the user.
+                  </>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCaseToDispose(null)}>Cancel</AlertDialogCancel>
+            <Button 
+              variant="destructive"
+              onClick={() => {
+                if (caseToDispose) {
+                  confirmDisposal(caseToDispose);
+                }
+              }}
+            >
+              Confirm Disposal
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-nyay-teal/10 flex items-center justify-center">
@@ -416,35 +451,6 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
             <SelectItem value="disposed">Disposed</SelectItem>
           </SelectContent>
         </Select>
-
-        {/* Disposal Confirmation Dialog */}
-        <AlertDialog open={disposeConfirmOpen} onOpenChange={setDisposeConfirmOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Case Disposal</AlertDialogTitle>
-              <AlertDialogDescription>
-                {caseToDispose && (
-                  <>
-                    Are you sure you want to dispose case #{caseToDispose.id.slice(0, 8).toUpperCase()}?
-                    <br /><br />
-                    <strong>Reason:</strong> {DISPOSAL_REASONS[caseToDispose.disposal_reason || ''] || caseToDispose.disposal_reason}
-                    <br /><br />
-                    This action will mark the case as disposed and notify the user.
-                  </>
-                )}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setCaseToDispose(null)}>Cancel</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={() => caseToDispose && confirmDisposal(caseToDispose)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Confirm Disposal
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
 
       {filteredCases.length === 0 ? (
