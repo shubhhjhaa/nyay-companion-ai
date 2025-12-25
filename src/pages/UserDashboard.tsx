@@ -168,7 +168,9 @@ const UserDashboard = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Welcome back,</p>
-                  <h1 className="text-4xl md:text-5xl font-bold text-foreground">{userName}</h1>
+                  <h1 className="text-4xl md:text-5xl font-display font-semibold text-foreground tracking-tight">
+                    {userName.split(' ')[0]}
+                  </h1>
                 </div>
               </div>
             )}
