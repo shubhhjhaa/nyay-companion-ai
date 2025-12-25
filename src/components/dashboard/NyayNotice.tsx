@@ -202,112 +202,124 @@ const NyayNotice = ({ onFindLawyers }: NyayNoticeProps) => {
     
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const marginLeft = 25;
-    const marginRight = 25;
-    const marginTop = 20;
-    const marginBottom = 25;
-    const contentWidth = pageWidth - marginLeft - marginRight;
+    const margin = 20;
+    const maxWidth = pageWidth - (margin * 2);
+    const lineHeight = 7;
     
-    let yPosition = marginTop;
+    let y = margin;
     
-    const addNewPageIfNeeded = (requiredSpace: number = 10) => {
-      if (yPosition + requiredSpace > pageHeight - marginBottom) {
-        doc.addPage();
-        yPosition = marginTop;
-        return true;
-      }
-      return false;
+    // Helper to sanitize text - remove problematic characters
+    const sanitizeText = (text: string): string => {
+      return text
+        .replace(/[\u2018\u2019]/g, "'")  // Smart quotes to regular
+        .replace(/[\u201C\u201D]/g, '"')  // Smart double quotes
+        .replace(/\u2013/g, '-')          // En dash
+        .replace(/\u2014/g, '--')         // Em dash
+        .replace(/\u2026/g, '...')        // Ellipsis
+        .replace(/\u20B9/g, 'Rs.')        // Rupee symbol
+        .replace(/₹/g, 'Rs.')             // Rupee symbol
+        .replace(/[^\x00-\x7F]/g, '')     // Remove any remaining non-ASCII
+        .trim();
     };
     
-    const writeText = (text: string, fontSize: number, fontStyle: "normal" | "bold" | "italic" = "normal", lineSpacing: number = 1.5) => {
+    // Helper to add text with auto page break
+    const addText = (text: string, fontSize: number = 11, isBold: boolean = false) => {
       doc.setFontSize(fontSize);
-      doc.setFont("times", fontStyle);
+      doc.setFont("helvetica", isBold ? "bold" : "normal");
       
-      const lineHeightMM = fontSize * 0.3528 * lineSpacing;
-      const lines = doc.splitTextToSize(text, contentWidth);
+      const cleanText = sanitizeText(text);
+      const lines = doc.splitTextToSize(cleanText, maxWidth);
       
-      lines.forEach((line: string) => {
-        addNewPageIfNeeded(lineHeightMM);
-        doc.text(line, marginLeft, yPosition);
-        yPosition += lineHeightMM;
-      });
+      for (let i = 0; i < lines.length; i++) {
+        if (y > pageHeight - 25) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(lines[i], margin, y);
+        y += lineHeight;
+      }
     };
-    
-    // Reset text color
-    doc.setTextColor(0, 0, 0);
     
     // Title
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(18);
-    doc.setFont("times", "bold");
-    doc.text("LEGAL NOTICE", pageWidth / 2, yPosition, { align: "center" });
-    yPosition += 12;
+    doc.setFont("helvetica", "bold");
+    doc.text("LEGAL NOTICE", pageWidth / 2, y, { align: "center" });
+    y += 10;
     
-    // Decorative line under title
-    doc.setDrawColor(0, 0, 0);
+    // Line separator
     doc.setLineWidth(0.5);
-    doc.line(marginLeft, yPosition - 4, pageWidth - marginRight, yPosition - 4);
-    yPosition += 8;
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 10;
     
     // Subject
-    doc.setFontSize(11);
-    doc.setFont("times", "bold");
-    const subjectText = `Subject: ${noticeResult.subject}`;
-    writeText(subjectText, 11, "bold", 1.4);
-    yPosition += 6;
+    addText("Subject: " + (noticeResult.subject || "Legal Notice"), 12, true);
+    y += 5;
     
-    // Process main content
-    // Normalize all line breaks - handle escaped \n and real newlines
+    // Get and clean the content
     let content = noticeResult.noticeContent || "";
     
-    // Replace escaped newlines with real newlines
+    // Handle all types of line breaks
     content = content
-      .split('\\n').join('\n')
-      .split('\\r\\n').join('\n')
-      .split('\\r').join('\n');
+      .replace(/\\n/g, '\n')
+      .replace(/\\r\\n/g, '\n')
+      .replace(/\\r/g, '\n')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n');
     
-    // Split into paragraphs
-    const paragraphs = content.split(/\n+/);
+    // Split by newlines and process each line
+    const lines = content.split('\n');
     
-    doc.setFont("times", "normal");
-    doc.setFontSize(11);
-    
-    paragraphs.forEach((para: string) => {
-      const trimmedPara = para.trim();
-      if (!trimmedPara) {
-        yPosition += 3;
-        return;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (line === '') {
+        y += 3; // Small gap for empty lines
+        continue;
       }
       
-      // Check if it's a heading or section title (all caps or ends with colon)
-      const isHeading = trimmedPara === trimmedPara.toUpperCase() && trimmedPara.length < 60;
-      const isSectionTitle = trimmedPara.endsWith(':') && trimmedPara.length < 80;
+      // Detect if line looks like a header (short, possibly numbered, or all caps)
+      const isHeader = (
+        (line.length < 50 && /^[0-9]+[\.\)]\s/.test(line)) ||
+        (line === line.toUpperCase() && line.length < 40) ||
+        line.endsWith(':')
+      );
       
-      if (isHeading || isSectionTitle) {
-        yPosition += 4;
-        writeText(trimmedPara, 11, "bold", 1.4);
-        yPosition += 2;
+      if (isHeader) {
+        y += 3;
+        addText(line, 11, true);
       } else {
-        writeText(trimmedPara, 11, "normal", 1.5);
-        yPosition += 4;
+        addText(line, 11, false);
       }
-    });
+    }
     
-    // Footer on last page
+    // Footer
     doc.setFontSize(8);
-    doc.setFont("times", "italic");
-    doc.setTextColor(100, 100, 100);
-    doc.text(
-      "This legal notice was generated using NyayBuddy - AI Legal Notice Generator",
-      pageWidth / 2,
-      pageHeight - 10,
-      { align: "center" }
-    );
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(128, 128, 128);
+    
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.text(
+        "Generated by NyayBuddy - AI Legal Notice Generator",
+        pageWidth / 2,
+        pageHeight - 10,
+        { align: "center" }
+      );
+      doc.text(
+        `Page ${i} of ${totalPages}`,
+        pageWidth - margin,
+        pageHeight - 10,
+        { align: "right" }
+      );
+    }
 
-    // Generate filename safely
+    // Safe filename
     const safeFileName = (formData.recipientName || "Notice")
       .replace(/[^a-zA-Z0-9\s]/g, '')
       .replace(/\s+/g, '_')
-      .substring(0, 30);
+      .substring(0, 30) || "Legal_Notice";
     
     doc.save(`Legal_Notice_${safeFileName}.pdf`);
     toast.success("PDF downloaded successfully!");
