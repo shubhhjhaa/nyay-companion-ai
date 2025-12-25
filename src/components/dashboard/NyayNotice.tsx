@@ -200,126 +200,136 @@ const NyayNotice = ({ onFindLawyers }: NyayNoticeProps) => {
       format: 'a4'
     });
     
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-    const maxWidth = pageWidth - (margin * 2);
-    const lineHeight = 7;
+    const pageWidth = doc.internal.pageSize.getWidth(); // 210mm for A4
+    const pageHeight = doc.internal.pageSize.getHeight(); // 297mm for A4
+    const marginLeft = 15;
+    const marginRight = 15;
+    const marginTop = 20;
+    const marginBottom = 20;
+    const usableWidth = pageWidth - marginLeft - marginRight; // ~180mm
     
-    let y = margin;
+    let y = marginTop;
     
-    // Helper to sanitize text - remove problematic characters
+    // Helper to sanitize text
     const sanitizeText = (text: string): string => {
-      return text
-        .replace(/[\u2018\u2019]/g, "'")  // Smart quotes to regular
-        .replace(/[\u201C\u201D]/g, '"')  // Smart double quotes
-        .replace(/\u2013/g, '-')          // En dash
-        .replace(/\u2014/g, '--')         // Em dash
-        .replace(/\u2026/g, '...')        // Ellipsis
-        .replace(/\u20B9/g, 'Rs.')        // Rupee symbol
-        .replace(/₹/g, 'Rs.')             // Rupee symbol
-        .replace(/[^\x00-\x7F]/g, '')     // Remove any remaining non-ASCII
+      if (!text) return '';
+      return String(text)
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/\u2013/g, '-')
+        .replace(/\u2014/g, '--')
+        .replace(/\u2026/g, '...')
+        .replace(/\u20B9/g, 'Rs.')
+        .replace(/₹/g, 'Rs.')
+        .replace(/[^\x00-\x7F\n]/g, ' ')
         .trim();
     };
     
-    // Helper to add text with auto page break
-    const addText = (text: string, fontSize: number = 11, isBold: boolean = false) => {
+    // Helper to add wrapped text
+    const addWrappedText = (text: string, fontSize: number, fontWeight: "normal" | "bold" = "normal", lineSpacing: number = 6) => {
       doc.setFontSize(fontSize);
-      doc.setFont("helvetica", isBold ? "bold" : "normal");
+      doc.setFont("helvetica", fontWeight);
       
       const cleanText = sanitizeText(text);
-      const lines = doc.splitTextToSize(cleanText, maxWidth);
+      if (!cleanText) return;
       
-      for (let i = 0; i < lines.length; i++) {
-        if (y > pageHeight - 25) {
+      // Calculate available width and split text
+      const textLines = doc.splitTextToSize(cleanText, usableWidth);
+      
+      for (const line of textLines) {
+        // Check if we need a new page
+        if (y + lineSpacing > pageHeight - marginBottom) {
           doc.addPage();
-          y = margin;
+          y = marginTop;
         }
-        doc.text(lines[i], margin, y);
-        y += lineHeight;
+        doc.text(line, marginLeft, y);
+        y += lineSpacing;
       }
     };
     
-    // Title
+    // Reset colors
     doc.setTextColor(0, 0, 0);
-    doc.setFontSize(18);
+    doc.setDrawColor(0, 0, 0);
+    
+    // ========== TITLE ==========
+    doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
     doc.text("LEGAL NOTICE", pageWidth / 2, y, { align: "center" });
+    y += 8;
+    
+    // Underline
+    doc.setLineWidth(0.3);
+    doc.line(marginLeft + 50, y, pageWidth - marginLeft - 50, y);
     y += 10;
     
-    // Line separator
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 10;
+    // ========== SUBJECT ==========
+    const subjectText = "Subject: " + sanitizeText(noticeResult.subject || "Legal Notice");
+    addWrappedText(subjectText, 11, "bold", 6);
+    y += 6;
     
-    // Subject
-    addText("Subject: " + (noticeResult.subject || "Legal Notice"), 12, true);
-    y += 5;
-    
-    // Get and clean the content
+    // ========== MAIN CONTENT ==========
     let content = noticeResult.noticeContent || "";
     
-    // Handle all types of line breaks
+    // Normalize line breaks - handle escaped and real newlines
     content = content
-      .replace(/\\n/g, '\n')
-      .replace(/\\r\\n/g, '\n')
-      .replace(/\\r/g, '\n')
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n');
+      .split('\\n').join('\n')
+      .split('\\r\\n').join('\n')
+      .split('\\r').join('\n');
     
-    // Split by newlines and process each line
-    const lines = content.split('\n');
+    // Process content line by line
+    const contentLines = content.split('\n');
     
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+    for (const rawLine of contentLines) {
+      const line = rawLine.trim();
       
-      if (line === '') {
-        y += 3; // Small gap for empty lines
+      if (!line) {
+        y += 4; // Empty line spacing
         continue;
       }
       
-      // Detect if line looks like a header (short, possibly numbered, or all caps)
+      // Check if it's a header/title line
       const isHeader = (
-        (line.length < 50 && /^[0-9]+[\.\)]\s/.test(line)) ||
-        (line === line.toUpperCase() && line.length < 40) ||
-        line.endsWith(':')
+        line.length < 60 && (
+          /^[0-9]+[\.\)\:]/.test(line) ||
+          /^[A-Z][A-Z\s]+:?$/.test(line) ||
+          /^(TO|FROM|DATE|SUBJECT|RE|NOTICE|DEMAND|WARNING|WHEREAS|NOW THEREFORE)/i.test(line)
+        )
       );
       
       if (isHeader) {
-        y += 3;
-        addText(line, 11, true);
+        y += 2;
+        addWrappedText(line, 11, "bold", 6);
       } else {
-        addText(line, 11, false);
+        addWrappedText(line, 10, "normal", 5);
       }
     }
     
-    // Footer
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(128, 128, 128);
-    
+    // ========== FOOTER ON ALL PAGES ==========
     const totalPages = doc.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i);
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      doc.setPage(pageNum);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "italic");
+      doc.setTextColor(120, 120, 120);
       doc.text(
         "Generated by NyayBuddy - AI Legal Notice Generator",
         pageWidth / 2,
-        pageHeight - 10,
+        pageHeight - 8,
         { align: "center" }
       );
       doc.text(
-        `Page ${i} of ${totalPages}`,
-        pageWidth - margin,
-        pageHeight - 10,
+        `Page ${pageNum} of ${totalPages}`,
+        pageWidth - marginRight,
+        pageHeight - 8,
         { align: "right" }
       );
     }
 
-    // Safe filename
-    const safeFileName = (formData.recipientName || "Notice")
+    // Generate safe filename
+    const safeFileName = sanitizeText(formData.recipientName || "Notice")
       .replace(/[^a-zA-Z0-9\s]/g, '')
       .replace(/\s+/g, '_')
-      .substring(0, 30) || "Legal_Notice";
+      .substring(0, 25) || "Legal_Notice";
     
     doc.save(`Legal_Notice_${safeFileName}.pdf`);
     toast.success("PDF downloaded successfully!");
