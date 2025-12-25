@@ -20,6 +20,9 @@ export type Database = {
           case_type: string
           created_at: string | null
           description: string | null
+          disposal_confirmed_at: string | null
+          disposal_reason: string | null
+          disposal_requested_at: string | null
           id: string
           lawyer_id: string | null
           status: string
@@ -31,6 +34,9 @@ export type Database = {
           case_type: string
           created_at?: string | null
           description?: string | null
+          disposal_confirmed_at?: string | null
+          disposal_reason?: string | null
+          disposal_requested_at?: string | null
           id?: string
           lawyer_id?: string | null
           status?: string
@@ -42,6 +48,9 @@ export type Database = {
           case_type?: string
           created_at?: string | null
           description?: string | null
+          disposal_confirmed_at?: string | null
+          disposal_reason?: string | null
+          disposal_requested_at?: string | null
           id?: string
           lawyer_id?: string | null
           status?: string

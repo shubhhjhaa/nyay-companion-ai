@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
-import { Briefcase, User, Calendar, ChevronRight, MessageSquare, FileText, AlertCircle, Brain, Sparkles } from "lucide-react";
+import { Briefcase, User, Calendar, ChevronRight, MessageSquare, FileText, AlertCircle, Brain, Sparkles, Trash2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,7 +28,17 @@ interface ActiveCase {
   ai_analysis: any;
   user_name?: string;
   user_location?: string;
+  disposal_reason?: string | null;
+  disposal_requested_at?: string | null;
 }
+
+const DISPOSAL_REASONS: Record<string, string> = {
+  "solved": "Case Solved",
+  "changing_lawyer": "Changing Lawyer",
+  "not_pursuing": "Not Pursuing Further",
+  "settled_outside": "Settled Outside Court",
+  "other": "Other Reason",
+};
 
 interface ActiveCasesProps {
   onOpenChat?: (caseId: string, userId: string) => void;
@@ -30,6 +50,8 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
   const [selectedCase, setSelectedCase] = useState<ActiveCase | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [disposeConfirmOpen, setDisposeConfirmOpen] = useState(false);
+  const [caseToDispose, setCaseToDispose] = useState<ActiveCase | null>(null);
 
   useEffect(() => {
     fetchCases();
@@ -107,11 +129,50 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
     }
   };
 
+  const confirmDisposal = async (caseItem: ActiveCase) => {
+    try {
+      const { error } = await supabase
+        .from('cases')
+        .update({ 
+          status: 'disposed',
+          disposal_confirmed_at: new Date().toISOString()
+        })
+        .eq('id', caseItem.id);
+
+      if (error) throw error;
+
+      // Notify the user
+      await supabase.from('notifications').insert({
+        user_id: caseItem.user_id,
+        title: 'Case Disposed',
+        message: `Your ${caseItem.case_type} case has been disposed. Reason: ${DISPOSAL_REASONS[caseItem.disposal_reason || ''] || caseItem.disposal_reason}`,
+        type: 'info',
+        case_id: caseItem.id
+      });
+
+      // Update local state
+      setCases(prev => prev.map(c => 
+        c.id === caseItem.id ? { ...c, status: 'disposed' } : c
+      ));
+      if (selectedCase?.id === caseItem.id) {
+        setSelectedCase(prev => prev ? { ...prev, status: 'disposed' } : null);
+      }
+
+      toast.success('Case disposed successfully');
+      setDisposeConfirmOpen(false);
+      setCaseToDispose(null);
+    } catch (error) {
+      console.error('Error disposing case:', error);
+      toast.error('Failed to dispose case');
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'in_progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
       case 'awaiting_documents': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
       case 'closed': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'disposed': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
       default: return 'bg-muted text-muted-foreground';
     }
   };
@@ -203,9 +264,34 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
                   <SelectItem value="in_progress">In Progress</SelectItem>
                   <SelectItem value="awaiting_documents">Awaiting Documents</SelectItem>
                   <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="disposed">Disposed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Disposal Request Alert */}
+            {selectedCase.disposal_requested_at && selectedCase.status !== 'disposed' && (
+              <div className="bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  <span className="font-semibold text-orange-800 dark:text-orange-300">Disposal Requested</span>
+                </div>
+                <p className="text-sm text-orange-700 dark:text-orange-400 mb-3">
+                  User has requested to dispose this case. Reason: <strong>{DISPOSAL_REASONS[selectedCase.disposal_reason || ''] || selectedCase.disposal_reason}</strong>
+                </p>
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => {
+                    setCaseToDispose(selectedCase);
+                    setDisposeConfirmOpen(true);
+                  }}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Confirm Disposal
+                </Button>
+              </div>
+            )}
             
             <h2 className="text-2xl font-bold mb-2">{selectedCase.case_type}</h2>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -327,8 +413,38 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
             <SelectItem value="in_progress">In Progress</SelectItem>
             <SelectItem value="awaiting_documents">Awaiting Docs</SelectItem>
             <SelectItem value="closed">Closed</SelectItem>
+            <SelectItem value="disposed">Disposed</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Disposal Confirmation Dialog */}
+        <AlertDialog open={disposeConfirmOpen} onOpenChange={setDisposeConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Case Disposal</AlertDialogTitle>
+              <AlertDialogDescription>
+                {caseToDispose && (
+                  <>
+                    Are you sure you want to dispose case #{caseToDispose.id.slice(0, 8).toUpperCase()}?
+                    <br /><br />
+                    <strong>Reason:</strong> {DISPOSAL_REASONS[caseToDispose.disposal_reason || ''] || caseToDispose.disposal_reason}
+                    <br /><br />
+                    This action will mark the case as disposed and notify the user.
+                  </>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setCaseToDispose(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => caseToDispose && confirmDisposal(caseToDispose)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Confirm Disposal
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {filteredCases.length === 0 ? (
@@ -359,7 +475,7 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="font-mono text-xs text-muted-foreground">
                           #{caseItem.id.slice(0, 8).toUpperCase()}
                         </span>
@@ -369,6 +485,12 @@ const ActiveCases = ({ onOpenChat, onViewDocuments }: ActiveCasesProps) => {
                         <Badge className={`${strength.bg} ${strength.color} border-0`}>
                           {strength.level}
                         </Badge>
+                        {caseItem.disposal_requested_at && caseItem.status !== 'disposed' && (
+                          <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 animate-pulse">
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            Disposal Requested
+                          </Badge>
+                        )}
                       </div>
                       <h3 className="font-semibold text-foreground">{caseItem.case_type}</h3>
                       <p className="text-sm text-nyay-teal">{caseItem.user_name}</p>

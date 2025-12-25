@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
-import { Folder, Clock, User, ChevronRight, MessageSquare, FileText, AlertCircle } from "lucide-react";
+import { Folder, Clock, User, ChevronRight, MessageSquare, FileText, AlertCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getLawyerById, Lawyer } from "@/data/lawyers";
@@ -16,6 +28,8 @@ interface Case {
   ai_analysis: any;
   created_at: string;
   updated_at: string;
+  disposal_reason?: string | null;
+  disposal_requested_at?: string | null;
 }
 
 interface MyCasesProps {
@@ -23,11 +37,21 @@ interface MyCasesProps {
   onOpenChat?: (caseId: string, lawyerId: string) => void;
 }
 
+const DISPOSAL_REASONS = [
+  { value: "solved", label: "Case Solved" },
+  { value: "changing_lawyer", label: "Changing Lawyer" },
+  { value: "not_pursuing", label: "Not Pursuing Further" },
+  { value: "settled_outside", label: "Settled Outside Court" },
+  { value: "other", label: "Other Reason" },
+];
+
 const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
   const [cases, setCases] = useState<Case[]>([]);
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lawyerDetails, setLawyerDetails] = useState<Record<string, Lawyer | undefined>>({});
+  const [disposeDialogOpen, setDisposeDialogOpen] = useState(false);
+  const [selectedDisposalReason, setSelectedDisposalReason] = useState<string>("");
 
   useEffect(() => {
     fetchCases();
@@ -91,11 +115,56 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
     }
   };
 
+  const requestDisposal = async (caseId: string, reason: string) => {
+    try {
+      const caseItem = cases.find(c => c.id === caseId);
+      if (!caseItem) return;
+
+      // Update case with disposal request
+      const { error: updateError } = await supabase
+        .from('cases')
+        .update({ 
+          disposal_reason: reason,
+          disposal_requested_at: new Date().toISOString()
+        })
+        .eq('id', caseId);
+
+      if (updateError) throw updateError;
+
+      // Notify the lawyer
+      if (caseItem.lawyer_id) {
+        await supabase.from('notifications').insert({
+          user_id: caseItem.lawyer_id,
+          title: 'Case Disposal Request',
+          message: `User has requested to dispose case #${caseId.slice(0, 8).toUpperCase()}. Reason: ${DISPOSAL_REASONS.find(r => r.value === reason)?.label || reason}`,
+          type: 'warning',
+          case_id: caseId
+        });
+      }
+
+      // Update local state
+      setCases(prev => prev.map(c => 
+        c.id === caseId ? { ...c, disposal_reason: reason, disposal_requested_at: new Date().toISOString() } : c
+      ));
+      if (selectedCase?.id === caseId) {
+        setSelectedCase(prev => prev ? { ...prev, disposal_reason: reason, disposal_requested_at: new Date().toISOString() } : null);
+      }
+
+      toast.success('Disposal request sent to lawyer');
+      setDisposeDialogOpen(false);
+      setSelectedDisposalReason("");
+    } catch (error) {
+      console.error('Error requesting disposal:', error);
+      toast.error('Failed to request disposal');
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
       case 'in_progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
       case 'closed': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+      case 'disposed': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
       default: return 'bg-muted text-muted-foreground';
     }
   };
@@ -187,14 +256,64 @@ const MyCases = ({ onViewCase, onOpenChat }: MyCasesProps) => {
                     )}
                   </div>
                 </div>
-                <Button 
-                  variant="gold" 
-                  className="w-full mt-4"
-                  onClick={() => onOpenChat?.(selectedCase.id, selectedCase.lawyer_id!)}
+                <div className="flex gap-2 mt-4">
+                  <Button 
+                    variant="gold" 
+                    className="flex-1"
+                    onClick={() => onOpenChat?.(selectedCase.id, selectedCase.lawyer_id!)}
                 >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Open Chat with {lawyer.name.split(' ')[1] || lawyer.name}
-                </Button>
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Chat
+                  </Button>
+                  
+                  {selectedCase.status !== 'disposed' && !selectedCase.disposal_requested_at && (
+                    <AlertDialog open={disposeDialogOpen} onOpenChange={setDisposeDialogOpen}>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" className="flex-1">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Dispose Case
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Dispose Case</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Please select a reason for disposing this case. The lawyer will need to confirm this action.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <div className="py-4">
+                          <Select value={selectedDisposalReason} onValueChange={setSelectedDisposalReason}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select disposal reason" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DISPOSAL_REASONS.map((reason) => (
+                                <SelectItem key={reason.value} value={reason.value}>
+                                  {reason.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel onClick={() => setSelectedDisposalReason("")}>Cancel</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => requestDisposal(selectedCase.id, selectedDisposalReason)}
+                            disabled={!selectedDisposalReason}
+                          >
+                            Request Disposal
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                  
+                  {selectedCase.disposal_requested_at && selectedCase.status !== 'disposed' && (
+                    <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">
+                      Disposal Pending
+                    </Badge>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
