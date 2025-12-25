@@ -1,4 +1,4 @@
-import { Scale, ShieldCheck, MessageSquareText, Mail, Users, ArrowRight, Gavel, BookOpen, FileCheck, Award, CheckCircle, Star, Phone, Clock, Building2, AlertCircle } from "lucide-react";
+import { Scale, ShieldCheck, MessageSquareText, Mail, Users, ArrowRight, Gavel, BookOpen, FileCheck, Award, CheckCircle, Star, Phone, Clock, Building2, AlertCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -412,63 +412,59 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
       </section>
 
       {/* Footer */}
-      <footer className="relative bg-gradient-to-b from-card to-background border-t border-border overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+      {/* Footer */}
+      <footer className="relative bg-slate-900 text-slate-300 overflow-hidden">
         
         {/* Decorative Top Border */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-nyay-indigo via-nyay-gold to-nyay-teal" />
         
-        <div className="container mx-auto px-4 py-16 relative">
-          <div className="grid md:grid-cols-12 gap-8 lg:gap-12 mb-12">
-            {/* Brand Section */}
-            <div className="md:col-span-5 animate-fade-in">
-              <div className="flex items-center gap-3 mb-6 group">
-                <div className="relative">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-hero shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                    <Scale className="w-6 h-6 text-primary-foreground" />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-nyay-gold rounded-full flex items-center justify-center shadow-md">
-                    <span className="text-[7px] font-bold text-nyay-indigo">AI</span>
-                  </div>
+        {/* Main Footer Content */}
+        <div className="container mx-auto px-4 pt-16 pb-8">
+          <div className="grid md:grid-cols-12 gap-10 lg:gap-16 mb-12">
+            
+            {/* Brand & About Section */}
+            <div className="md:col-span-4 animate-fade-in">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-nyay-indigo to-nyay-teal shadow-lg">
+                  <Scale className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <span className="text-2xl font-bold text-foreground tracking-tight">
+                  <span className="text-2xl font-bold text-white tracking-tight">
                     Nyay<span className="text-nyay-gold">Buddy</span>
                   </span>
-                  <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Legal Assistance Platform</p>
+                  <p className="text-[10px] text-slate-400 tracking-wider uppercase">Legal Assistance Platform</p>
                 </div>
               </div>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-md">
-                India's trusted AI-powered legal assistance platform. We help citizens understand their legal rights and connect with Bar Council verified lawyers.
+              <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                India's trusted AI-powered legal assistance platform helping citizens understand their legal rights and connect with Bar Council verified advocates.
               </p>
               
-              {/* Trust Badges */}
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 transition-transform hover:scale-105 duration-300">
-                  <ShieldCheck className="w-4 h-4 text-green-600" />
-                  <span className="text-xs font-medium text-green-700 dark:text-green-400">SSL Encrypted</span>
+              {/* Contact Info */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm">
+                  <Mail className="w-4 h-4 text-nyay-gold" />
+                  <span>support@nyaybuddy.in</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-nyay-gold/10 border border-nyay-gold/30 transition-transform hover:scale-105 duration-300">
-                  <Award className="w-4 h-4 text-nyay-gold" />
-                  <span className="text-xs font-medium text-nyay-gold">Verified Platform</span>
+                <div className="flex items-center gap-3 text-sm">
+                  <Phone className="w-4 h-4 text-nyay-gold" />
+                  <span>+91 1800-XXX-XXXX (Toll Free)</span>
+                </div>
+                <div className="flex items-start gap-3 text-sm">
+                  <MapPin className="w-4 h-4 text-nyay-gold mt-0.5" />
+                  <span>New Delhi, India</span>
                 </div>
               </div>
             </div>
             
-            {/* Services */}
+            {/* Our Services */}
             <div className="md:col-span-2 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              <h4 className="font-bold text-foreground mb-5 flex items-center gap-2">
-                <Gavel className="w-4 h-4 text-nyay-indigo" />
-                Services
+              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">
+                Our Services
               </h4>
               <ul className="space-y-3">
-                {["Case Analysis", "Find Lawyers", "Legal Notices", "NyayMail", "Consumer Help"].map((item, i) => (
-                  <li key={i} className="group">
-                    <span className="text-sm text-muted-foreground hover:text-nyay-gold transition-colors duration-300 cursor-pointer flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-nyay-gold/50 group-hover:bg-nyay-gold transition-colors" />
+                {["AI Case Analysis", "Find Verified Lawyers", "Legal Notices", "NyayMail Drafting", "Consumer Grievance", "Document Scanning"].map((item, i) => (
+                  <li key={i}>
+                    <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors duration-300 cursor-pointer">
                       {item}
                     </span>
                   </li>
@@ -476,17 +472,15 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
               </ul>
             </div>
             
-            {/* Legal Areas */}
+            {/* Practice Areas */}
             <div className="md:col-span-2 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              <h4 className="font-bold text-foreground mb-5 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-nyay-teal" />
-                Legal Areas
+              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">
+                Practice Areas
               </h4>
               <ul className="space-y-3">
-                {["Consumer Rights", "Property Law", "Family Disputes", "Criminal Defense", "Labour Law"].map((item, i) => (
-                  <li key={i} className="group">
-                    <span className="text-sm text-muted-foreground hover:text-nyay-teal transition-colors duration-300 cursor-pointer flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-nyay-teal/50 group-hover:bg-nyay-teal transition-colors" />
+                {["Consumer Rights", "Property & Real Estate", "Family & Matrimonial", "Criminal Defense", "Labour & Employment", "Civil Litigation"].map((item, i) => (
+                  <li key={i}>
+                    <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors duration-300 cursor-pointer">
                       {item}
                     </span>
                   </li>
@@ -494,58 +488,116 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
               </ul>
             </div>
             
-            {/* Contact & Legal */}
-            <div className="md:col-span-3 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <h4 className="font-bold text-foreground mb-5 flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-nyay-gold" />
-                Legal Information
+            {/* Quick Links */}
+            <div className="md:col-span-2 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">
+                Quick Links
               </h4>
               <ul className="space-y-3">
-                {["Terms of Service", "Privacy Policy", "Disclaimer", "Refund Policy", "Contact Us"].map((item, i) => (
-                  <li key={i} className="group">
-                    <span className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-300 cursor-pointer flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 group-hover:bg-foreground transition-colors" />
+                {["About Us", "How It Works", "For Lawyers", "FAQs", "Blog", "Careers"].map((item, i) => (
+                  <li key={i}>
+                    <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors duration-300 cursor-pointer">
                       {item}
                     </span>
                   </li>
                 ))}
               </ul>
+            </div>
+            
+            {/* Legal */}
+            <div className="md:col-span-2 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+              <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">
+                Legal
+              </h4>
+              <ul className="space-y-3">
+                {["Terms of Service", "Privacy Policy", "Cookie Policy", "Disclaimer", "Refund Policy", "Grievance Officer"].map((item, i) => (
+                  <li key={i}>
+                    <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors duration-300 cursor-pointer">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          {/* Trust & Compliance Section */}
+          <div className="grid md:grid-cols-3 gap-6 mb-10 py-8 border-y border-slate-700/50">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-green-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">256-bit SSL Encryption</p>
+                <p className="text-xs text-slate-400">Your data is secure with us</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center">
+                <Award className="w-6 h-6 text-nyay-gold" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">Bar Council Verified</p>
+                <p className="text-xs text-slate-400">All lawyers are verified</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center">
+                <FileCheck className="w-6 h-6 text-nyay-teal" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">IT Act Compliant</p>
+                <p className="text-xs text-slate-400">Following Indian IT laws</p>
+              </div>
             </div>
           </div>
           
           {/* Disclaimer Banner */}
-          <div className="mb-8 p-4 rounded-xl bg-muted/50 border border-border animate-fade-in" style={{ animationDelay: "0.4s" }}>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-nyay-indigo/10 flex items-center justify-center shrink-0 mt-0.5">
-                <AlertCircle className="w-4 h-4 text-nyay-indigo" />
+          <div className="mb-8 p-5 rounded-lg bg-slate-800/50 border border-slate-700 animate-fade-in">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-amber-500" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-foreground mb-1">Legal Disclaimer</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  NyayBuddy provides AI-assisted legal information and lawyer discovery services. The information provided is for general guidance only and does not constitute legal advice. For specific legal matters, please consult a qualified advocate. NyayBuddy is not a law firm and does not provide legal representation.
+                <p className="text-sm font-semibold text-white mb-2">Important Legal Disclaimer</p>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  NyayBuddy is an AI-powered legal technology platform and does not constitute a law firm. The information provided through our services is for general informational purposes only and should not be construed as legal advice. For specific legal matters, we strongly recommend consulting with a qualified advocate enrolled with the Bar Council of India. NyayBuddy facilitates connection between users and verified legal professionals but does not provide legal representation. Use of this platform is subject to our Terms of Service.
                 </p>
               </div>
             </div>
           </div>
-          
-          {/* Bottom Bar */}
-          <div className="pt-8 border-t border-border">
+        </div>
+        
+        {/* Bottom Bar */}
+        <div className="bg-slate-950 py-6">
+          <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-6">
-                <p className="text-sm text-muted-foreground">
-                  © 2025 NyayBuddy. All rights reserved.
+              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+                <p className="text-sm text-slate-400">
+                  © 2025 NyayBuddy Technologies Pvt. Ltd. All rights reserved.
                 </p>
-                <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs text-slate-500">
                   <span>Made with</span>
-                  <span className="text-red-500 animate-pulse">❤</span>
-                  <span>in India</span>
+                  <span className="text-red-500">❤</span>
+                  <span>in India for Indians</span>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
                   <span>All Systems Operational</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-slate-500 hover:text-nyay-gold cursor-pointer transition-colors">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                  </span>
+                  <span className="text-slate-500 hover:text-nyay-gold cursor-pointer transition-colors">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  </span>
+                  <span className="text-slate-500 hover:text-nyay-gold cursor-pointer transition-colors">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                  </span>
                 </div>
               </div>
             </div>
