@@ -105,15 +105,10 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" className="hidden md:flex" onClick={onAccountClick}>
-                I'm a Lawyer
-              </Button>
-              <Button variant="gold" onClick={onAccountClick} className="shadow-lg hover:shadow-xl transition-shadow">
-                <span>Get Started</span>
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
+            <Button variant="gold" onClick={onAccountClick} className="shadow-lg hover:shadow-xl transition-shadow">
+              <span>Get Started</span>
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
           </nav>
         </header>
 
