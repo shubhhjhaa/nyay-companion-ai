@@ -46,6 +46,7 @@ const NyayNotice = ({ onFindLawyers }: NyayNoticeProps) => {
   const [formData, setFormData] = useState({
     // Sender
     senderName: "",
+    senderFatherName: "",
     senderAddress: "",
     senderCity: "",
     senderState: "",
@@ -339,7 +340,7 @@ const NyayNotice = ({ onFindLawyers }: NyayNoticeProps) => {
     setStep("sender");
     setNoticeResult(null);
     setFormData({
-      senderName: "", senderAddress: "", senderCity: "", senderState: "", senderPincode: "",
+      senderName: "", senderFatherName: "", senderAddress: "", senderCity: "", senderState: "", senderPincode: "",
       senderMobile: "", senderEmail: "", recipientName: "", recipientAddress: "", branchAddress: "",
       relationshipType: "", transactionDate: "", orderId: "", amountPaid: "", problemDescription: "",
       issueNature: "", lossDescription: "", customerCareContacted: "", nchComplaint: "",
@@ -567,6 +568,10 @@ const NyayNotice = ({ onFindLawyers }: NyayNoticeProps) => {
               <div className="space-y-2">
                 <Label>Your Full Name *</Label>
                 <Input value={formData.senderName} onChange={(e) => updateField("senderName", e.target.value)} placeholder="Full name as per ID" />
+              </div>
+              <div className="space-y-2">
+                <Label>Father's / Husband's Name *</Label>
+                <Input value={formData.senderFatherName} onChange={(e) => updateField("senderFatherName", e.target.value)} placeholder="S/o or D/o or W/o" />
               </div>
               <div className="space-y-2">
                 <Label>Full Address *</Label>
