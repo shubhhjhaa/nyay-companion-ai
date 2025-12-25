@@ -1,4 +1,4 @@
-import { Scale, ShieldCheck, MessageSquareText, Mail, Users, ArrowRight, Gavel, BookOpen, FileCheck, Award, CheckCircle, Star, Phone, Clock, Building2 } from "lucide-react";
+import { Scale, ShieldCheck, MessageSquareText, Mail, Users, ArrowRight, Gavel, BookOpen, FileCheck, Award, CheckCircle, Star, Phone, Clock, Building2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -412,56 +412,143 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 bg-card border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-hero">
-                  <Scale className="w-5 h-5 text-primary-foreground" />
+      <footer className="relative bg-gradient-to-b from-card to-background border-t border-border overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+        
+        {/* Decorative Top Border */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-nyay-indigo via-nyay-gold to-nyay-teal" />
+        
+        <div className="container mx-auto px-4 py-16 relative">
+          <div className="grid md:grid-cols-12 gap-8 lg:gap-12 mb-12">
+            {/* Brand Section */}
+            <div className="md:col-span-5 animate-fade-in">
+              <div className="flex items-center gap-3 mb-6 group">
+                <div className="relative">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-hero shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                    <Scale className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-nyay-gold rounded-full flex items-center justify-center shadow-md">
+                    <span className="text-[7px] font-bold text-nyay-indigo">AI</span>
+                  </div>
                 </div>
-                <span className="text-xl font-bold text-foreground">
-                  Nyay<span className="text-nyay-gold">Buddy</span>
-                </span>
+                <div>
+                  <span className="text-2xl font-bold text-foreground tracking-tight">
+                    Nyay<span className="text-nyay-gold">Buddy</span>
+                  </span>
+                  <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Legal Assistance Platform</p>
+                </div>
               </div>
-              <p className="text-muted-foreground text-sm max-w-md mb-4">
-                NyayBuddy is India's trusted AI-powered legal assistance platform. We help common citizens understand their legal rights and connect with verified lawyers.
+              <p className="text-muted-foreground text-sm leading-relaxed mb-6 max-w-md">
+                India's trusted AI-powered legal assistance platform. We help citizens understand their legal rights and connect with Bar Council verified lawyers.
               </p>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <ShieldCheck className="w-4 h-4 text-green-600" />
-                <span>ISO 27001 Certified • SSL Encrypted</span>
+              
+              {/* Trust Badges */}
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 transition-transform hover:scale-105 duration-300">
+                  <ShieldCheck className="w-4 h-4 text-green-600" />
+                  <span className="text-xs font-medium text-green-700 dark:text-green-400">SSL Encrypted</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-nyay-gold/10 border border-nyay-gold/30 transition-transform hover:scale-105 duration-300">
+                  <Award className="w-4 h-4 text-nyay-gold" />
+                  <span className="text-xs font-medium text-nyay-gold">Verified Platform</span>
+                </div>
               </div>
             </div>
             
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Services</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Case Analysis</li>
-                <li>Find Lawyers</li>
-                <li>Legal Notices</li>
-                <li>Consumer Complaints</li>
+            {/* Services */}
+            <div className="md:col-span-2 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+              <h4 className="font-bold text-foreground mb-5 flex items-center gap-2">
+                <Gavel className="w-4 h-4 text-nyay-indigo" />
+                Services
+              </h4>
+              <ul className="space-y-3">
+                {["Case Analysis", "Find Lawyers", "Legal Notices", "NyayMail", "Consumer Help"].map((item, i) => (
+                  <li key={i} className="group">
+                    <span className="text-sm text-muted-foreground hover:text-nyay-gold transition-colors duration-300 cursor-pointer flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-nyay-gold/50 group-hover:bg-nyay-gold transition-colors" />
+                      {item}
+                    </span>
+                  </li>
+                ))}
               </ul>
             </div>
             
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Legal Areas</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Consumer Rights</li>
-                <li>Property Disputes</li>
-                <li>Family Law</li>
-                <li>Criminal Defense</li>
+            {/* Legal Areas */}
+            <div className="md:col-span-2 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+              <h4 className="font-bold text-foreground mb-5 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-nyay-teal" />
+                Legal Areas
+              </h4>
+              <ul className="space-y-3">
+                {["Consumer Rights", "Property Law", "Family Disputes", "Criminal Defense", "Labour Law"].map((item, i) => (
+                  <li key={i} className="group">
+                    <span className="text-sm text-muted-foreground hover:text-nyay-teal transition-colors duration-300 cursor-pointer flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-nyay-teal/50 group-hover:bg-nyay-teal transition-colors" />
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            {/* Contact & Legal */}
+            <div className="md:col-span-3 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+              <h4 className="font-bold text-foreground mb-5 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-nyay-gold" />
+                Legal Information
+              </h4>
+              <ul className="space-y-3">
+                {["Terms of Service", "Privacy Policy", "Disclaimer", "Refund Policy", "Contact Us"].map((item, i) => (
+                  <li key={i} className="group">
+                    <span className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-300 cursor-pointer flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 group-hover:bg-foreground transition-colors" />
+                      {item}
+                    </span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
           
-          <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              © 2024 NyayBuddy. All rights reserved.
-            </p>
-            <p className="text-xs text-muted-foreground text-center max-w-xl">
-              <strong>Disclaimer:</strong> NyayBuddy provides AI-assisted legal guidance and lawyer discovery. 
-              It does not replace professional legal consultation.
-            </p>
+          {/* Disclaimer Banner */}
+          <div className="mb-8 p-4 rounded-xl bg-muted/50 border border-border animate-fade-in" style={{ animationDelay: "0.4s" }}>
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-nyay-indigo/10 flex items-center justify-center shrink-0 mt-0.5">
+                <AlertCircle className="w-4 h-4 text-nyay-indigo" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-foreground mb-1">Legal Disclaimer</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  NyayBuddy provides AI-assisted legal information and lawyer discovery services. The information provided is for general guidance only and does not constitute legal advice. For specific legal matters, please consult a qualified advocate. NyayBuddy is not a law firm and does not provide legal representation.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-border">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-6">
+                <p className="text-sm text-muted-foreground">
+                  © 2025 NyayBuddy. All rights reserved.
+                </p>
+                <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground">
+                  <span>Made with</span>
+                  <span className="text-red-500 animate-pulse">❤</span>
+                  <span>in India</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span>All Systems Operational</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
