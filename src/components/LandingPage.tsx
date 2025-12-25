@@ -1,6 +1,7 @@
-import { Scale, ShieldCheck, MessageSquareText, Mail, Users, ArrowRight, Gavel, BookOpen, FileCheck, Award, CheckCircle, Star, Phone, Clock, Building2, AlertCircle, MapPin } from "lucide-react";
+import { Scale, ShieldCheck, MessageSquareText, Mail, Users, ArrowRight, Gavel, BookOpen, FileCheck, Award, CheckCircle, Star, Phone, Clock, Building2, AlertCircle, MapPin, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import snehhImage from "@/assets/snehh-chatbot.png";
 
 interface LandingPageProps {
   onAccountClick: () => void;
@@ -375,6 +376,84 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Meet Snehh Section */}
+      <section className="py-24 bg-gradient-to-br from-nyay-teal/5 via-background to-nyay-gold/5 relative overflow-hidden">
+        <div className="absolute top-20 right-20 w-64 h-64 bg-nyay-gold/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-20 w-48 h-48 bg-nyay-teal/10 rounded-full blur-3xl" />
+        
+        <div className="container mx-auto px-4 relative">
+          <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+            
+            {/* Image */}
+            <div className="relative animate-fade-in order-2 md:order-1">
+              <div className="relative w-72 h-72 md:w-96 md:h-96 mx-auto">
+                {/* Decorative rings */}
+                <div className="absolute inset-0 rounded-full border-2 border-nyay-gold/20 animate-pulse" />
+                <div className="absolute inset-4 rounded-full border border-nyay-teal/30" />
+                
+                {/* Image container */}
+                <div className="absolute inset-8 rounded-full overflow-hidden shadow-2xl ring-4 ring-nyay-gold/30">
+                  <img 
+                    src={snehhImage} 
+                    alt="Snehh - Your AI Legal Companion" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                {/* Floating badges */}
+                <div className="absolute -top-2 right-8 bg-card px-3 py-1.5 rounded-full shadow-lg border border-border animate-float">
+                  <span className="text-sm font-medium text-nyay-teal flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> AI Powered
+                  </span>
+                </div>
+                <div className="absolute bottom-4 -left-4 bg-card px-3 py-1.5 rounded-full shadow-lg border border-border animate-float" style={{ animationDelay: "0.5s" }}>
+                  <span className="text-sm font-medium text-nyay-gold flex items-center gap-1">
+                    <Heart className="w-3 h-3" /> 24/7 Support
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="order-1 md:order-2 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-nyay-teal/10 text-nyay-teal text-sm font-medium mb-6">
+                <MessageSquareText className="w-4 h-4" />
+                <span>Your AI Legal Companion</span>
+              </div>
+              
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
+                Meet <span className="text-nyay-gold">Snehh</span>
+              </h2>
+              
+              <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+                Snehh is your compassionate AI legal assistant who understands the emotional weight of legal troubles. She's here to listen, guide, and support you through every step of your legal journey.
+              </p>
+              
+              <ul className="space-y-4 mb-8">
+                {[
+                  "Understands Hindi & English — talk naturally",
+                  "Available 24/7 for instant legal guidance",
+                  "Empathetic support during stressful times",
+                  "Explains complex laws in simple words"
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-foreground">
+                    <div className="w-6 h-6 rounded-full bg-nyay-gold/20 flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-nyay-gold" />
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              
+              <Button variant="gold" size="lg" onClick={onAccountClick} className="group">
+                Chat with Snehh
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
