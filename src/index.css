@@ -6,114 +6,114 @@
 
 @layer base {
   :root {
-    /* NyayBuddy - Deep Blue & Silver Legal Palette */
-    --background: 210 25% 97%;
-    --foreground: 220 40% 13%;
+    /* NyayBuddy - Forest Green & Cream Palette */
+    --background: 40 35% 97%;
+    --foreground: 150 30% 15%;
 
-    --card: 210 20% 99%;
-    --card-foreground: 220 40% 13%;
+    --card: 40 30% 99%;
+    --card-foreground: 150 30% 15%;
 
-    --popover: 210 20% 99%;
-    --popover-foreground: 220 40% 13%;
+    --popover: 40 30% 99%;
+    --popover-foreground: 150 30% 15%;
 
-    /* Deep Navy Blue - Trust & Authority */
-    --primary: 220 55% 28%;
-    --primary-foreground: 210 25% 97%;
+    /* Deep Forest Green - Trust & Wisdom */
+    --primary: 155 45% 25%;
+    --primary-foreground: 40 35% 97%;
 
-    /* Cool Slate - Professional */
-    --secondary: 215 25% 45%;
-    --secondary-foreground: 210 25% 97%;
+    /* Warm Terracotta - Indian Earth */
+    --secondary: 18 55% 50%;
+    --secondary-foreground: 40 35% 97%;
 
-    /* Warm Teal - Balance & Wisdom */
-    --accent: 175 45% 38%;
-    --accent-foreground: 210 25% 97%;
+    /* Soft Sage - Balance */
+    --accent: 145 25% 45%;
+    --accent-foreground: 40 35% 97%;
 
-    --muted: 215 20% 92%;
-    --muted-foreground: 220 15% 45%;
+    --muted: 40 20% 92%;
+    --muted-foreground: 150 15% 40%;
 
     --destructive: 0 72% 50%;
-    --destructive-foreground: 210 25% 97%;
+    --destructive-foreground: 40 35% 97%;
 
-    --border: 215 20% 88%;
-    --input: 215 20% 88%;
-    --ring: 220 55% 28%;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 155 45% 25%;
 
     --radius: 0.75rem;
 
-    /* Custom NyayBuddy tokens - Deep Blue & Silver */
-    --nyay-indigo: 220 55% 28%;
-    --nyay-indigo-light: 220 50% 42%;
-    --nyay-indigo-dark: 220 60% 18%;
-    --nyay-silver: 215 25% 55%;
-    --nyay-silver-light: 215 20% 70%;
-    --nyay-teal: 175 45% 38%;
-    --nyay-teal-light: 175 50% 50%;
-    --nyay-cream: 210 20% 96%;
-    --nyay-warm-gray: 220 15% 50%;
-    --nyay-slate: 220 20% 35%;
-    --nyay-light-blue: 205 65% 55%;
+    /* Custom NyayBuddy tokens - Forest & Earth */
+    --nyay-indigo: 155 45% 25%;
+    --nyay-indigo-light: 150 40% 38%;
+    --nyay-indigo-dark: 155 50% 18%;
+    --nyay-gold: 18 55% 50%;
+    --nyay-gold-light: 22 60% 60%;
+    --nyay-teal: 145 25% 45%;
+    --nyay-teal-light: 145 30% 55%;
+    --nyay-cream: 40 40% 95%;
+    --nyay-warm-gray: 40 10% 50%;
+    --nyay-terracotta: 18 55% 50%;
+    --nyay-sandalwood: 35 25% 75%;
 
-    /* Gradients - Sophisticated Blue tones */
-    --gradient-hero: linear-gradient(135deg, hsl(220 55% 28%) 0%, hsl(220 50% 38%) 50%, hsl(205 65% 55%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(205 65% 55%) 0%, hsl(195 60% 65%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(210 20% 99%) 0%, hsl(210 25% 96%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(210 25% 97%) 0%, hsl(215 20% 94%) 100%);
+    /* Gradients - Earthy & Natural */
+    --gradient-hero: linear-gradient(135deg, hsl(155 45% 25%) 0%, hsl(150 40% 35%) 50%, hsl(145 25% 45%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(18 55% 50%) 0%, hsl(22 60% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(40 30% 99%) 0%, hsl(40 35% 96%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(40 35% 97%) 0%, hsl(40 30% 94%) 100%);
 
-    /* Shadows - Clean & Professional */
-    --shadow-sm: 0 2px 8px -2px hsl(220 40% 15% / 0.08);
-    --shadow-md: 0 4px 16px -4px hsl(220 40% 15% / 0.12);
-    --shadow-lg: 0 8px 32px -8px hsl(220 40% 15% / 0.16);
-    --shadow-glow: 0 0 40px hsl(205 65% 55% / 0.3);
-    --shadow-card: 0 4px 24px -8px hsl(220 40% 15% / 0.1);
+    /* Shadows - Warm & Natural */
+    --shadow-sm: 0 2px 8px -2px hsl(150 30% 20% / 0.08);
+    --shadow-md: 0 4px 16px -4px hsl(150 30% 20% / 0.12);
+    --shadow-lg: 0 8px 32px -8px hsl(150 30% 20% / 0.16);
+    --shadow-glow: 0 0 40px hsl(155 45% 30% / 0.25);
+    --shadow-card: 0 4px 24px -8px hsl(150 30% 20% / 0.1);
 
-    /* Sidebar - Deep Navy */
-    --sidebar-background: 220 55% 20%;
-    --sidebar-foreground: 210 25% 97%;
-    --sidebar-primary: 205 65% 55%;
-    --sidebar-primary-foreground: 220 55% 15%;
-    --sidebar-accent: 220 50% 30%;
-    --sidebar-accent-foreground: 210 25% 97%;
-    --sidebar-border: 220 50% 28%;
-    --sidebar-ring: 205 65% 55%;
+    /* Sidebar - Deep Forest */
+    --sidebar-background: 155 45% 18%;
+    --sidebar-foreground: 40 35% 97%;
+    --sidebar-primary: 18 55% 55%;
+    --sidebar-primary-foreground: 155 45% 15%;
+    --sidebar-accent: 155 40% 28%;
+    --sidebar-accent-foreground: 40 35% 97%;
+    --sidebar-border: 155 40% 25%;
+    --sidebar-ring: 18 55% 55%;
   }
 
   .dark {
-    --background: 220 50% 8%;
-    --foreground: 210 25% 97%;
+    --background: 155 40% 8%;
+    --foreground: 40 35% 97%;
 
-    --card: 220 50% 12%;
-    --card-foreground: 210 25% 97%;
+    --card: 155 40% 12%;
+    --card-foreground: 40 35% 97%;
 
-    --popover: 220 50% 12%;
-    --popover-foreground: 210 25% 97%;
+    --popover: 155 40% 12%;
+    --popover-foreground: 40 35% 97%;
 
-    --primary: 205 65% 55%;
-    --primary-foreground: 220 50% 10%;
+    --primary: 145 40% 50%;
+    --primary-foreground: 155 40% 10%;
 
-    --secondary: 220 40% 30%;
-    --secondary-foreground: 210 25% 97%;
+    --secondary: 18 50% 45%;
+    --secondary-foreground: 40 35% 97%;
 
-    --accent: 175 50% 45%;
-    --accent-foreground: 220 50% 10%;
+    --accent: 145 30% 40%;
+    --accent-foreground: 155 40% 10%;
 
-    --muted: 220 40% 18%;
-    --muted-foreground: 220 20% 65%;
+    --muted: 155 30% 18%;
+    --muted-foreground: 150 15% 60%;
 
     --destructive: 0 63% 35%;
-    --destructive-foreground: 210 25% 97%;
+    --destructive-foreground: 40 35% 97%;
 
-    --border: 220 40% 18%;
-    --input: 220 40% 18%;
-    --ring: 205 65% 55%;
+    --border: 155 30% 18%;
+    --input: 155 30% 18%;
+    --ring: 145 40% 50%;
 
-    --sidebar-background: 220 50% 8%;
-    --sidebar-foreground: 210 25% 97%;
-    --sidebar-primary: 205 65% 55%;
-    --sidebar-primary-foreground: 220 50% 10%;
-    --sidebar-accent: 220 50% 15%;
-    --sidebar-accent-foreground: 210 25% 97%;
-    --sidebar-border: 220 40% 18%;
-    --sidebar-ring: 205 65% 55%;
+    --sidebar-background: 155 40% 8%;
+    --sidebar-foreground: 40 35% 97%;
+    --sidebar-primary: 18 55% 55%;
+    --sidebar-primary-foreground: 155 40% 10%;
+    --sidebar-accent: 155 40% 15%;
+    --sidebar-accent-foreground: 40 35% 97%;
+    --sidebar-border: 155 30% 18%;
+    --sidebar-ring: 18 55% 55%;
   }
 }
 
@@ -233,10 +233,10 @@
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px hsl(205 65% 55% / 0.3);
+    box-shadow: 0 0 20px hsl(155 45% 30% / 0.3);
   }
   50% {
-    box-shadow: 0 0 40px hsl(205 65% 55% / 0.5);
+    box-shadow: 0 0 40px hsl(155 45% 30% / 0.5);
   }
 }
 
