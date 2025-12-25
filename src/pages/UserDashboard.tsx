@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "next-themes";
-import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText, Sun, Moon, User } from "lucide-react";
+import { Scale, LogOut, Search, MessageSquareText, Mail, ArrowLeft, Folder, Heart, Bell, Book, Shield, FileText, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,7 +44,7 @@ interface NyayScanData {
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
+  
   const [activeFeature, setActiveFeature] = useState<ActiveFeature>("home");
   const [prefillCaseType, setPrefillCaseType] = useState<string>("");
   const [chatState, setChatState] = useState<ChatState | null>(null);
@@ -233,20 +232,10 @@ const UserDashboard = () => {
             </div>
             <span className="text-xl font-bold">Nyay<span className="text-nyay-gold">Buddy</span></span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full"
-            >
-              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
-            <Button variant="ghost" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-          </div>
+          <Button variant="ghost" onClick={handleLogout}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
         </div>
       </header>
 
