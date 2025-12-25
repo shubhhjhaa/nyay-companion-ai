@@ -23,15 +23,31 @@ serve(async (req) => {
 
     const systemPrompt = `You are NyayNotice, an AI legal notice generator specialized in Indian law. Generate a professional, legally compliant legal notice based on the provided information.
 
+CRITICAL - INTELLIGENT ISSUE DETECTION:
+The user may select one issue type (like "Delay in Delivery") but describe a completely different problem in their description. YOU MUST:
+1. IGNORE the selected "Nature of Issue" if the problem description clearly describes something else
+2. Analyze the actual problem description to determine the TRUE nature of the issue
+3. Apply the correct legal provisions based on what actually happened, NOT what was selected
+4. Generate the notice based on the ACTUAL issue described
+
+For example:
+- If user selects "Delay in Delivery" but describes fraud/cheating in the description, treat it as FRAUD
+- If user selects "Refund Not Processed" but describes defective product, treat it as DEFECTIVE PRODUCT
+- Always prioritize the detailed description over the dropdown selection
+
 The legal notice MUST follow Indian legal standards and include:
 1. Professional header with "LEGAL NOTICE" title
-2. Date and place
-3. Sender's complete details
+2. Date and place (use today's date)
+3. Sender's complete details INCLUDING Father's/Husband's Name (S/o, D/o, or W/o format)
 4. Recipient's complete details with "To," prefix
-5. Subject line clearly stating the matter
-6. "Under Instructions From" clause (referencing the sender)
+5. Subject line clearly stating the ACTUAL matter (based on description, not selected option)
+6. "Under Instructions From" clause (referencing the sender with father's name)
 7. Chronological statement of facts with dates
-8. Legal grounds (mention relevant consumer protection laws, contract laws as applicable)
+8. Legal grounds based on ACTUAL issue:
+   - Consumer Protection Act 2019 for consumer matters
+   - Indian Contract Act 1872 for contractual disputes
+   - IPC Sections 406, 420 for fraud/cheating
+   - Information Technology Act 2000 for cyber fraud
 9. Clear demand/relief sought
 10. Time-bound compliance deadline
 11. Consequences of non-compliance (legal proceedings, costs, damages)
@@ -41,10 +57,11 @@ ALSO: Based on the recipient company/person name, detect and provide their offic
 
 Your response MUST be in this exact JSON format:
 {
-  "noticeContent": "Complete legal notice text with proper formatting, paragraphs, and legal structure. Use \\n for line breaks.",
-  "subject": "Subject line for the legal notice",
+  "noticeContent": "Complete legal notice text with proper formatting, paragraphs, and legal structure. Use actual newlines for line breaks, NOT escaped \\n characters.",
+  "subject": "Subject line for the legal notice based on ACTUAL issue",
   "summary": "Brief 2-3 sentence summary of the notice",
   "recommendedDeadline": "7/15/30 days based on case severity",
+  "detectedIssue": "The actual issue type detected from the description (may differ from selected)",
   "nextSteps": [
     "Step-by-step guidance on what to do after generating notice"
   ],
@@ -58,19 +75,19 @@ Your response MUST be in this exact JSON format:
     "address": "Registered office address if known, or null",
     "confidence": "high/medium/low"
   },
-  "legalForum": "Recommended legal forum if notice is ignored (Consumer Court, Civil Court, etc.)"
+  "legalForum": "Recommended legal forum if notice is ignored (Consumer Court, Civil Court, Criminal Court, etc.)"
 }
 
 Important guidelines:
 - Use formal legal English appropriate for Indian courts
 - Do NOT use threatening or emotional language
-- Reference Consumer Protection Act 2019 for consumer matters
-- Reference Indian Contract Act 1872 for contractual disputes
+- ALWAYS include sender's name with Father's/Husband's name in proper legal format
 - Include specific dates, amounts, and transaction details provided
 - Make the notice comprehensive but readable
 - Structure with proper paragraphs and numbering
 - For companyDetails, use your knowledge of well-known companies (banks, telecom, e-commerce, insurance, airlines, etc.)
 - If company is not well-known, infer common patterns or leave as null
+- Use ACTUAL newlines in the noticeContent, not \\n escape sequences
 
 Always respond with valid JSON only, no additional text.`;
 
@@ -78,6 +95,7 @@ Always respond with valid JSON only, no additional text.`;
 
 SENDER DETAILS:
 - Full Name: ${formData.senderName}
+- Father's/Husband's Name: ${formData.senderFatherName || 'Not provided'}
 - Address: ${formData.senderAddress}
 - City: ${formData.senderCity}, ${formData.senderState} - ${formData.senderPincode}
 - Mobile: ${formData.senderMobile}
@@ -92,12 +110,14 @@ RELATIONSHIP/TRANSACTION:
 - Relationship Type: ${formData.relationshipType}
 - Date of Purchase/Agreement: ${formData.transactionDate || 'Not specified'}
 - Invoice/Order ID: ${formData.orderId || 'Not provided'}
-- Amount Paid: ${formData.amountPaid ? `₹${formData.amountPaid}` : 'Not specified'}
+- Amount Paid: ${formData.amountPaid ? `Rs.${formData.amountPaid}` : 'Not specified'}
 
-PROBLEM DETAILS:
-- Issue Description: ${formData.problemDescription}
-- Nature of Issue: ${formData.issueNature}
+PROBLEM DETAILS (ANALYZE THIS CAREFULLY - This is the ACTUAL issue regardless of what is selected below):
+- Detailed Issue Description: ${formData.problemDescription}
+- User Selected Issue Type (may be incorrect): ${formData.issueNature}
 - Loss/Harassment Faced: ${formData.lossDescription || 'Not specified'}
+
+IMPORTANT: If the detailed description describes a DIFFERENT issue than what was selected, use the ACTUAL issue from the description. For example, if "Delay in Delivery" is selected but the description talks about fraud or cheating, treat it as fraud.
 
 PREVIOUS ACTIONS:
 - Customer Care Contacted: ${formData.customerCareContacted || 'No'}
@@ -107,7 +127,7 @@ PREVIOUS ACTIONS:
 
 RELIEF DEMANDED:
 - Resolution Type: ${formData.resolutionType}
-- Amount Demanded: ${formData.amountDemanded ? `₹${formData.amountDemanded}` : 'Not specified'}
+- Amount Demanded: ${formData.amountDemanded ? `Rs.${formData.amountDemanded}` : 'Not specified'}
 - Other Relief: ${formData.otherRelief || 'Not specified'}
 
 RESPONSE TIME: ${formData.responseTime || '15'} days`;
