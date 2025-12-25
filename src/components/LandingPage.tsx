@@ -436,7 +436,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
               <div className="group">
                 <h4 className="font-semibold text-white text-sm mb-3 flex items-center gap-2 cursor-pointer">
                   Services
-                  <span className="text-xs text-slate-500 group-hover:text-nyay-gold transition-colors">+more</span>
+                  <span className="text-xs text-slate-500 group-hover:text-nyay-gold transition-colors duration-300">+more</span>
                 </h4>
                 <ul className="space-y-2">
                   {["AI Case Analysis", "Find Lawyers"].map((item, i) => (
@@ -444,12 +444,14 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
                       <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
                     </li>
                   ))}
-                  <div className="hidden group-hover:block space-y-2 pt-2 animate-fade-in">
-                    {["Legal Notices", "NyayMail", "Consumer Help"].map((item, i) => (
-                      <li key={i}>
-                        <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
-                      </li>
-                    ))}
+                  <div className="overflow-hidden max-h-0 group-hover:max-h-40 transition-all duration-500 ease-out opacity-0 group-hover:opacity-100">
+                    <div className="space-y-2 pt-2">
+                      {["Legal Notices", "NyayMail", "Consumer Help"].map((item, i) => (
+                        <li key={i} style={{ transitionDelay: `${i * 50}ms` }} className="translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                          <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
+                        </li>
+                      ))}
+                    </div>
                   </div>
                 </ul>
               </div>
@@ -458,7 +460,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
               <div className="group">
                 <h4 className="font-semibold text-white text-sm mb-3 flex items-center gap-2 cursor-pointer">
                   Practice Areas
-                  <span className="text-xs text-slate-500 group-hover:text-nyay-gold transition-colors">+more</span>
+                  <span className="text-xs text-slate-500 group-hover:text-nyay-gold transition-colors duration-300">+more</span>
                 </h4>
                 <ul className="space-y-2">
                   {["Consumer Rights", "Property Law"].map((item, i) => (
@@ -466,12 +468,14 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
                       <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
                     </li>
                   ))}
-                  <div className="hidden group-hover:block space-y-2 pt-2 animate-fade-in">
-                    {["Family Law", "Criminal Defense", "Labour Law"].map((item, i) => (
-                      <li key={i}>
-                        <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
-                      </li>
-                    ))}
+                  <div className="overflow-hidden max-h-0 group-hover:max-h-40 transition-all duration-500 ease-out opacity-0 group-hover:opacity-100">
+                    <div className="space-y-2 pt-2">
+                      {["Family Law", "Criminal Defense", "Labour Law"].map((item, i) => (
+                        <li key={i} style={{ transitionDelay: `${i * 50}ms` }} className="translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                          <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
+                        </li>
+                      ))}
+                    </div>
                   </div>
                 </ul>
               </div>
@@ -480,7 +484,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
               <div className="group">
                 <h4 className="font-semibold text-white text-sm mb-3 flex items-center gap-2 cursor-pointer">
                   Legal
-                  <span className="text-xs text-slate-500 group-hover:text-nyay-gold transition-colors">+more</span>
+                  <span className="text-xs text-slate-500 group-hover:text-nyay-gold transition-colors duration-300">+more</span>
                 </h4>
                 <ul className="space-y-2">
                   {["Terms", "Privacy"].map((item, i) => (
@@ -488,12 +492,14 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
                       <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
                     </li>
                   ))}
-                  <div className="hidden group-hover:block space-y-2 pt-2 animate-fade-in">
-                    {["Disclaimer", "Refund Policy", "Contact"].map((item, i) => (
-                      <li key={i}>
-                        <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
-                      </li>
-                    ))}
+                  <div className="overflow-hidden max-h-0 group-hover:max-h-40 transition-all duration-500 ease-out opacity-0 group-hover:opacity-100">
+                    <div className="space-y-2 pt-2">
+                      {["Disclaimer", "Refund Policy", "Contact"].map((item, i) => (
+                        <li key={i} style={{ transitionDelay: `${i * 50}ms` }} className="translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                          <span className="text-sm text-slate-400 hover:text-nyay-gold transition-colors cursor-pointer">{item}</span>
+                        </li>
+                      ))}
+                    </div>
                   </div>
                 </ul>
               </div>
