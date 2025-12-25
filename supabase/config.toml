@@ -3,6 +3,9 @@ project_id = "simpawfglbrdvtixkaxq"
 [functions.nyayscan]
 verify_jwt = false
 
+[functions.nyayscan-detailed]
+verify_jwt = false
+
 [functions.nyaymail]
 verify_jwt = false
 

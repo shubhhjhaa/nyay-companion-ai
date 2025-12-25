@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageSquareText, Send, Loader2, AlertTriangle, CheckCircle, ExternalLink, ChevronRight, Users } from "lucide-react";
+import { MessageSquareText, Send, Loader2, AlertTriangle, CheckCircle, ExternalLink, ChevronRight, Users, Sparkles, Building2, FileText, Scale, ArrowRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,18 +21,58 @@ interface CaseAnalysis {
   estimatedTimeframe: string;
 }
 
+interface DetailedAnalysis {
+  authority: {
+    name: string;
+    explanation: string;
+    role: string;
+  };
+  actionPlan: Array<{
+    step: number;
+    action: string;
+    explanation: string;
+    expectedOutcome: string;
+  }>;
+  pastCases: Array<{
+    summary: string;
+    outcome: string;
+    relevance: string;
+  }>;
+  finalAssessment: {
+    currentStage: string;
+    immediateAction: string;
+    legalAssistance: 'not_required' | 'optional' | 'recommended';
+    assistanceReasoning: string;
+  };
+}
+
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 interface NyayScanProps {
   onFindLawyers?: (caseType: string, caseDescription: string, analysis: CaseAnalysis | null) => void;
 }
 
+type Step = "input" | "analyzing" | "result" | "consumer-check" | "proceed-choice" | "detailed-loading" | "detailed-followup" | "detailed-result";
+
 const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
-  const [step, setStep] = useState<"input" | "analyzing" | "result" | "consumer-check" | "proceed-choice">("input");
+  const [step, setStep] = useState<Step>("input");
   const [caseDescription, setCaseDescription] = useState("");
   const [analysis, setAnalysis] = useState<CaseAnalysis | null>(null);
   const [consumerRegistered, setConsumerRegistered] = useState<string>("");
   const [complaintId, setComplaintId] = useState("");
   const [proceedChoice, setProceedChoice] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Detailed analysis state
+  const [detailedAnalysis, setDetailedAnalysis] = useState<DetailedAnalysis | null>(null);
+  const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState<string>("");
+  const [aiMessage, setAiMessage] = useState<string>("");
+  const [userResponse, setUserResponse] = useState("");
+  const [questionCount, setQuestionCount] = useState(0);
 
   const handleAnalyze = async () => {
     if (!caseDescription.trim()) {
@@ -56,7 +96,6 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
 
       setAnalysis(data.analysis);
 
-      // Check if it's a consumer case
       if (data.analysis.isConsumerCase) {
         setStep("consumer-check");
       } else {
@@ -91,6 +130,130 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
     setStep("result");
   };
 
+  const startDetailedAnalysis = async () => {
+    setStep("detailed-loading");
+    setConversationHistory([]);
+    setQuestionCount(0);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("nyayscan-detailed", {
+        body: {
+          caseDescription,
+          initialAnalysis: analysis,
+          conversationHistory: [],
+          action: 'start'
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const result = data.result;
+
+      if (result.type === 'follow_up') {
+        setAiMessage(result.message);
+        setCurrentQuestion(result.questions?.[0] || '');
+        setStep("detailed-followup");
+        setQuestionCount(1);
+      } else if (result.type === 'analysis_ready') {
+        await generateDetailedAnalysis([]);
+      }
+    } catch (error: any) {
+      console.error("Detailed analysis error:", error);
+      toast.error(error.message || "Failed to start detailed analysis.");
+      setStep("result");
+    }
+  };
+
+  const handleUserResponse = async () => {
+    if (!userResponse.trim()) {
+      toast.error("Please provide your response");
+      return;
+    }
+
+    setStep("detailed-loading");
+
+    const newHistory: ConversationMessage[] = [
+      ...conversationHistory,
+      { role: 'assistant', content: `${aiMessage}\n\nQuestion: ${currentQuestion}` },
+      { role: 'user', content: userResponse }
+    ];
+    setConversationHistory(newHistory);
+    setUserResponse("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke("nyayscan-detailed", {
+        body: {
+          caseDescription,
+          initialAnalysis: analysis,
+          conversationHistory: newHistory,
+          action: 'respond'
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const result = data.result;
+
+      if (result.type === 'follow_up' && questionCount < 3) {
+        setAiMessage(result.message);
+        setCurrentQuestion(result.questions?.[0] || '');
+        setStep("detailed-followup");
+        setQuestionCount(prev => prev + 1);
+      } else {
+        await generateDetailedAnalysis(newHistory);
+      }
+    } catch (error: any) {
+      console.error("Response processing error:", error);
+      toast.error(error.message || "Failed to process response.");
+      setStep("detailed-followup");
+    }
+  };
+
+  const generateDetailedAnalysis = async (history: ConversationMessage[]) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("nyayscan-detailed", {
+        body: {
+          caseDescription,
+          initialAnalysis: analysis,
+          conversationHistory: history,
+          action: 'generate'
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const result = data.result;
+
+      if (result.type === 'detailed_analysis') {
+        setDetailedAnalysis(result);
+        setStep("detailed-result");
+      } else {
+        throw new Error("Invalid analysis response");
+      }
+    } catch (error: any) {
+      console.error("Generate analysis error:", error);
+      toast.error(error.message || "Failed to generate detailed analysis.");
+      setStep("result");
+    }
+  };
+
+  const skipToAnalysis = async () => {
+    setStep("detailed-loading");
+    await generateDetailedAnalysis(conversationHistory);
+  };
+
   const resetForm = () => {
     setStep("input");
     setCaseDescription("");
@@ -98,20 +261,283 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
     setConsumerRegistered("");
     setComplaintId("");
     setProceedChoice("");
+    setDetailedAnalysis(null);
+    setConversationHistory([]);
+    setCurrentQuestion("");
+    setAiMessage("");
+    setUserResponse("");
+    setQuestionCount(0);
   };
 
-  if (step === "analyzing") {
+  const backToResult = () => {
+    setStep("result");
+    setDetailedAnalysis(null);
+  };
+
+  // Loading states
+  if (step === "analyzing" || step === "detailed-loading") {
     return (
       <div className="max-w-xl mx-auto">
         <Card className="shadow-card">
           <CardContent className="py-16 text-center">
             <Loader2 className="w-16 h-16 text-nyay-teal mx-auto mb-4 animate-spin" />
-            <h3 className="text-xl font-semibold mb-2">Analyzing Your Case...</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              {step === "analyzing" ? "Analyzing Your Case..." : "Generating Detailed Analysis..."}
+            </h3>
             <p className="text-muted-foreground">
-              Our AI is reviewing your legal situation and preparing guidance.
+              {step === "analyzing" 
+                ? "Our AI is reviewing your legal situation and preparing guidance."
+                : "Our AI is conducting in-depth research and preparing comprehensive guidance."
+              }
             </p>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Detailed follow-up questions
+  if (step === "detailed-followup") {
+    return (
+      <div className="max-w-xl mx-auto">
+        <Button variant="ghost" className="mb-4" onClick={backToResult}>
+          ← Back to Basic Analysis
+        </Button>
+
+        <Card className="shadow-card">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-nyay-indigo/10 flex items-center justify-center">
+                <MessageCircle className="w-5 h-5 text-nyay-indigo" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Detailed Analysis</CardTitle>
+                <p className="text-sm text-muted-foreground">Question {questionCount} of 3 (max)</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {/* AI Message */}
+            <div className="p-4 rounded-xl bg-muted/50 border">
+              <p className="text-sm text-foreground">{aiMessage}</p>
+            </div>
+
+            {/* Current Question */}
+            <div className="space-y-3">
+              <Label className="text-base font-medium">{currentQuestion}</Label>
+              <Textarea
+                value={userResponse}
+                onChange={(e) => setUserResponse(e.target.value)}
+                placeholder="Type your response here..."
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="teal"
+                className="flex-1"
+                onClick={handleUserResponse}
+                disabled={!userResponse.trim()}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Submit Response
+              </Button>
+              <Button
+                variant="outline"
+                onClick={skipToAnalysis}
+              >
+                Skip to Analysis
+              </Button>
+            </div>
+
+            <p className="text-xs text-muted-foreground text-center">
+              Your responses help the AI provide more accurate and relevant guidance.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Detailed Analysis Result
+  if (step === "detailed-result" && detailedAnalysis && analysis) {
+    const assistanceColors = {
+      not_required: 'bg-nyay-teal/10 text-nyay-teal border-nyay-teal/20',
+      optional: 'bg-nyay-gold/10 text-nyay-gold border-nyay-gold/20',
+      recommended: 'bg-destructive/10 text-destructive border-destructive/20'
+    };
+
+    const assistanceLabels = {
+      not_required: 'Legal Assistance Not Required',
+      optional: 'Legal Assistance Optional',
+      recommended: 'Legal Assistance Recommended'
+    };
+
+    return (
+      <div className="max-w-3xl mx-auto">
+        <Button variant="ghost" className="mb-4" onClick={backToResult}>
+          ← Back to Basic Analysis
+        </Button>
+
+        <div className="space-y-6">
+          {/* Header */}
+          <Card className="shadow-card border-l-4 border-l-nyay-indigo">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-nyay-indigo/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-6 h-6 text-nyay-indigo" />
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-nyay-indigo">Detailed AI Analysis</span>
+                  <h2 className="text-2xl font-bold text-foreground">{analysis.caseType}</h2>
+                  <p className="text-muted-foreground mt-1">{analysis.summary}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Relevant Authority */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-nyay-teal" />
+                <CardTitle className="text-lg">Relevant Authority</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 rounded-xl bg-nyay-teal/5 border border-nyay-teal/20">
+                <h4 className="font-semibold text-foreground">{detailedAnalysis.authority.name}</h4>
+                <p className="text-sm text-muted-foreground mt-2">{detailedAnalysis.authority.explanation}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Role & Powers</Label>
+                <p className="text-sm text-muted-foreground mt-1">{detailedAnalysis.authority.role}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Action Plan */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-nyay-gold" />
+                <CardTitle className="text-lg">Step-by-Step Action Plan</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {detailedAnalysis.actionPlan.map((item, i) => (
+                  <div key={i} className="relative pl-8 pb-4 last:pb-0">
+                    {i < detailedAnalysis.actionPlan.length - 1 && (
+                      <div className="absolute left-[11px] top-8 bottom-0 w-0.5 bg-border" />
+                    )}
+                    <div className="absolute left-0 top-0 w-6 h-6 rounded-full bg-nyay-gold text-primary-foreground text-xs font-medium flex items-center justify-center">
+                      {item.step}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground">{item.action}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">{item.explanation}</p>
+                      <div className="flex items-center gap-2 mt-2 text-xs">
+                        <ArrowRight className="w-3 h-3 text-nyay-teal" />
+                        <span className="text-nyay-teal font-medium">Expected: {item.expectedOutcome}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Past Cases Reference */}
+          {detailedAnalysis.pastCases && detailedAnalysis.pastCases.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Scale className="w-5 h-5 text-nyay-indigo" />
+                  <CardTitle className="text-lg">Relevant Past Cases (AI Reference)</CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground">Similar case patterns for awareness</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {detailedAnalysis.pastCases.map((item, i) => (
+                    <div key={i} className="p-4 rounded-xl bg-muted/50 border">
+                      <p className="text-sm font-medium text-foreground">{item.summary}</p>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-medium">Outcome:</span> {item.outcome}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-medium">Relevance:</span> {item.relevance}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Final Assessment */}
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="text-lg">Final Case Assessment</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium">Current Stage</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{detailedAnalysis.finalAssessment.currentStage}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Immediate Action</Label>
+                  <p className="text-sm text-muted-foreground mt-1">{detailedAnalysis.finalAssessment.immediateAction}</p>
+                </div>
+              </div>
+
+              <div className={`p-4 rounded-xl border ${assistanceColors[detailedAnalysis.finalAssessment.legalAssistance]}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  {detailedAnalysis.finalAssessment.legalAssistance === 'not_required' && <CheckCircle className="w-5 h-5" />}
+                  {detailedAnalysis.finalAssessment.legalAssistance === 'optional' && <AlertTriangle className="w-5 h-5" />}
+                  {detailedAnalysis.finalAssessment.legalAssistance === 'recommended' && <Users className="w-5 h-5" />}
+                  <span className="font-semibold">{assistanceLabels[detailedAnalysis.finalAssessment.legalAssistance]}</span>
+                </div>
+                <p className="text-sm opacity-90">{detailedAnalysis.finalAssessment.assistanceReasoning}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Professional Support - Only shown at the end */}
+          {(detailedAnalysis.finalAssessment.legalAssistance === 'optional' || 
+            detailedAnalysis.finalAssessment.legalAssistance === 'recommended') && (
+            <Card className="bg-gradient-hero text-primary-foreground">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Users className="w-10 h-10" />
+                    <div>
+                      <h3 className="text-lg font-semibold">Connect with Professional Support</h3>
+                      <p className="text-primary-foreground/80 text-sm">Optional: Get assistance from experienced legal professionals</p>
+                    </div>
+                  </div>
+                  <Button variant="gold" onClick={() => onFindLawyers?.(analysis.caseType, caseDescription, analysis)}>
+                    Find Lawyers
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Disclaimer */}
+          <div className="p-4 rounded-xl bg-muted/50 border text-center">
+            <p className="text-xs text-muted-foreground">
+              <AlertTriangle className="w-3 h-3 inline mr-1" />
+              This detailed AI analysis is for guidance and awareness only and does not replace professional legal advice.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -272,6 +698,27 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
                     </span>
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Detailed Analysis CTA */}
+          <Card className="border-nyay-indigo/30 bg-nyay-indigo/5">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-nyay-indigo/10 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-nyay-indigo" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">Want deeper insights?</h3>
+                    <p className="text-sm text-muted-foreground">Get authority mapping, action plan, and case assessment</p>
+                  </div>
+                </div>
+                <Button onClick={startDetailedAnalysis} className="bg-nyay-indigo hover:bg-nyay-indigo/90">
+                  View Detailed AI Analysis
+                  <Sparkles className="w-4 h-4 ml-2" />
+                </Button>
               </div>
             </CardContent>
           </Card>
