@@ -186,6 +186,18 @@
   .animate-pulse-glow {
     animation: pulseGlow 2s ease-in-out infinite;
   }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: floatSlow 8s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 6s ease-in-out infinite 2s;
+  }
 }
 
 @keyframes fadeIn {
@@ -221,10 +233,31 @@
 
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px hsl(38 92% 50% / 0.3);
+    box-shadow: 0 0 20px hsl(28 85% 55% / 0.3);
   }
   50% {
-    box-shadow: 0 0 40px hsl(38 92% 50% / 0.5);
+    box-shadow: 0 0 40px hsl(28 85% 55% / 0.5);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-4px) rotate(-1deg);
   }
 }
 
