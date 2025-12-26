@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useDashboard } from "@/contexts/DashboardContext";
 
 interface CaseAnalysis {
   caseType: string;
@@ -112,6 +113,7 @@ const ALLOWED_FILE_TYPES = [
 ];
 
 const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
+  const { language } = useDashboard();
   const [step, setStep] = useState<Step>("input");
   const [caseDescription, setCaseDescription] = useState("");
   const [analysis, setAnalysis] = useState<CaseAnalysis | null>(null);
@@ -144,7 +146,7 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
 
     try {
       const { data, error } = await supabase.functions.invoke("nyayscan", {
-        body: { caseDescription },
+        body: { caseDescription, language },
       });
 
       if (error) throw error;
@@ -202,7 +204,8 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
           caseDescription,
           initialAnalysis: analysis,
           conversationHistory: [],
-          action: 'start'
+          action: 'start',
+          language
         },
       });
 
@@ -373,7 +376,8 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
           initialAnalysis: analysis,
           conversationHistory: newHistory,
           action: 'respond',
-          attachedFiles: filesForAnalysis
+          attachedFiles: filesForAnalysis,
+          language
         },
       });
 
@@ -416,7 +420,8 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
           initialAnalysis: analysis,
           conversationHistory: history,
           action: 'generate',
-          attachedFiles: filesForAnalysis
+          attachedFiles: filesForAnalysis,
+          language
         },
       });
 
