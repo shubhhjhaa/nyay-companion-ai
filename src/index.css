@@ -75,7 +75,8 @@
     --sidebar-ring: 38 92% 50%;
   }
 
-  .dark {
+  .dark,
+  [data-theme="dark"] {
     --background: 222 47% 8%;
     --foreground: 210 40% 98%;
 
