@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { caseDescription } = await req.json();
+    const { caseDescription, language = 'en' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -20,8 +20,15 @@ serve(async (req) => {
     }
 
     console.log('Analyzing case:', caseDescription.substring(0, 100) + '...');
+    console.log('Language:', language);
+
+    const languageInstruction = language === 'hi' 
+      ? `IMPORTANT: Your ENTIRE response must be in Hindi (हिंदी). All text including caseType, summary, prerequisites, recommendations, nextSteps, and estimatedTimeframe must be written in Hindi language using Devanagari script.`
+      : `Respond in English.`;
 
     const systemPrompt = `You are NyayScan, an AI legal assistant for Indian users. Analyze the user's legal issue and provide structured guidance.
+
+${languageInstruction}
 
 Your response MUST be in this exact JSON format:
 {

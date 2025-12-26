@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { caseDescription, initialAnalysis, conversationHistory, action, attachedFiles } = await req.json();
+    const { caseDescription, initialAnalysis, conversationHistory, action, attachedFiles, language = 'en' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -26,8 +26,19 @@ serve(async (req) => {
 
     console.log('Detailed analysis action:', action);
     console.log('Attached files:', attachedFiles?.length || 0);
+    console.log('Language:', language);
 
     const caseType = initialAnalysis?.caseType || 'General Legal Issue';
+
+    // Language instruction
+    const languageInstruction = language === 'hi' 
+      ? `CRITICAL LANGUAGE REQUIREMENT: Your ENTIRE response must be in Hindi (हिंदी) using Devanagari script. This includes:
+- All questions must be in Hindi
+- All messages must be in Hindi
+- All analysis text must be in Hindi
+- All explanations, steps, and recommendations must be in Hindi
+- Only JSON keys should remain in English, but all VALUES must be in Hindi`
+      : `Respond in English.`;
 
     // Build file context if files are attached
     let fileContext = '';
@@ -51,6 +62,8 @@ IMPORTANT: When analyzing attached documents:
     }
 
     const systemPrompt = `You are NyayScan Detailed Analyst, an expert AI legal assistant for Indian users. You provide in-depth, educational legal guidance through adaptive conversation.
+
+${languageInstruction}
 
 INITIAL CASE CONTEXT:
 Case Description: ${caseDescription}
