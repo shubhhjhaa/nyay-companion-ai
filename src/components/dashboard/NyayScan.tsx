@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MessageSquareText, Send, Loader2, AlertTriangle, CheckCircle, ExternalLink, ChevronRight, Users, Sparkles, Building2, FileText, Scale, ArrowRight, MessageCircle, Calendar, DollarSign, Clock, TrendingUp, Shield, Gavel } from "lucide-react";
+import { useState, useRef } from "react";
+import { MessageSquareText, Send, Loader2, AlertTriangle, CheckCircle, ExternalLink, ChevronRight, Users, Sparkles, Building2, FileText, Scale, ArrowRight, MessageCircle, Calendar, DollarSign, Clock, TrendingUp, Shield, Gavel, Paperclip, X, Upload, File } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +30,13 @@ interface SmartQuestion {
   options?: string[];
   scale_labels?: { min: string; max: string };
   required: boolean;
+}
+
+interface UploadedFile {
+  name: string;
+  type: string;
+  content: string; // base64 or extracted text
+  size: number;
 }
 
 interface DetailedAnalysis {
@@ -93,6 +100,17 @@ interface NyayScanProps {
 
 type Step = "input" | "analyzing" | "result" | "consumer-check" | "proceed-choice" | "detailed-loading" | "detailed-followup" | "detailed-result";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_FILE_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'text/plain',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+
 const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
   const [step, setStep] = useState<Step>("input");
   const [caseDescription, setCaseDescription] = useState("");
@@ -109,6 +127,11 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
   const [smartQuestions, setSmartQuestions] = useState<SmartQuestion[]>([]);
   const [questionResponses, setQuestionResponses] = useState<Record<string, any>>({});
   const [questionSetCount, setQuestionSetCount] = useState(0);
+  
+  // File upload state
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAnalyze = async () => {
     if (!caseDescription.trim()) {
@@ -206,8 +229,83 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
     }
   };
 
+  // File upload handlers
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+
+    try {
+      for (const file of Array.from(files)) {
+        // Validate file size
+        if (file.size > MAX_FILE_SIZE) {
+          toast.error(`${file.name} is too large. Maximum size is 5MB.`);
+          continue;
+        }
+
+        // Validate file type
+        if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+          toast.error(`${file.name} is not a supported file type.`);
+          continue;
+        }
+
+        // Read file content
+        const content = await readFileContent(file);
+        
+        setUploadedFiles(prev => [...prev, {
+          name: file.name,
+          type: file.type,
+          content,
+          size: file.size
+        }]);
+
+        toast.success(`${file.name} attached successfully`);
+      }
+    } catch (error) {
+      console.error('File upload error:', error);
+      toast.error('Failed to attach file');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const readFileContent = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      if (file.type === 'text/plain') {
+        // Read as text
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsText(file);
+      } else {
+        // Read as base64 for images and PDFs
+        reader.onload = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      }
+    });
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
   const formatResponsesForHistory = (): string => {
-    return smartQuestions.map(q => {
+    let responses = smartQuestions.map(q => {
       const response = questionResponses[q.id];
       let formattedResponse = '';
       
@@ -223,6 +321,14 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
       
       return `Q: ${q.question}\nA: ${formattedResponse}`;
     }).join('\n\n');
+
+    // Add file information if any
+    if (uploadedFiles.length > 0) {
+      responses += '\n\n[ATTACHED DOCUMENTS]\n';
+      responses += uploadedFiles.map(f => `- ${f.name} (${f.type})`).join('\n');
+    }
+
+    return responses;
   };
 
   const handleSubmitResponses = async () => {
@@ -254,12 +360,20 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
     setQuestionResponses({});
 
     try {
+      // Prepare file data for AI analysis
+      const filesForAnalysis = uploadedFiles.map(f => ({
+        name: f.name,
+        type: f.type,
+        content: f.type === 'text/plain' ? f.content : f.content.substring(0, 1000) // Limit content size
+      }));
+
       const { data, error } = await supabase.functions.invoke("nyayscan-detailed", {
         body: {
           caseDescription,
           initialAnalysis: analysis,
           conversationHistory: newHistory,
-          action: 'respond'
+          action: 'respond',
+          attachedFiles: filesForAnalysis
         },
       });
 
@@ -276,6 +390,7 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
         setSmartQuestions(result.questions || []);
         setStep("detailed-followup");
         setQuestionSetCount(prev => prev + 1);
+        // Keep files for next round
       } else {
         await generateDetailedAnalysis(newHistory);
       }
@@ -288,12 +403,20 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
 
   const generateDetailedAnalysis = async (history: ConversationMessage[]) => {
     try {
+      // Prepare file data for final analysis
+      const filesForAnalysis = uploadedFiles.map(f => ({
+        name: f.name,
+        type: f.type,
+        content: f.type === 'text/plain' ? f.content : f.content.substring(0, 1000)
+      }));
+
       const { data, error } = await supabase.functions.invoke("nyayscan-detailed", {
         body: {
           caseDescription,
           initialAnalysis: analysis,
           conversationHistory: history,
-          action: 'generate'
+          action: 'generate',
+          attachedFiles: filesForAnalysis
         },
       });
 
@@ -347,6 +470,7 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
     setAiMessage("");
     setQuestionResponses({});
     setQuestionSetCount(0);
+    setUploadedFiles([]);
   };
 
   const backToResult = () => {
@@ -550,6 +674,65 @@ const NyayScan = ({ onFindLawyers }: NyayScanProps) => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* File Upload Section */}
+            <div className="p-4 rounded-xl bg-muted/30 border border-dashed space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Paperclip className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Attach Supporting Documents</span>
+                  <span className="text-xs text-muted-foreground">(Optional)</span>
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  accept=".pdf,.jpg,.jpeg,.png,.webp,.txt,.doc,.docx"
+                  multiple
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4 mr-2" />
+                  )}
+                  Upload
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Attach emails, receipts, agreements, notices, or any relevant documents. AI will analyze them for your case.
+              </p>
+
+              {/* Uploaded Files List */}
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  {uploadedFiles.map((file, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-background border">
+                      <div className="flex items-center gap-2">
+                        <File className="w-4 h-4 text-nyay-indigo" />
+                        <span className="text-sm font-medium truncate max-w-[200px]">{file.name}</span>
+                        <span className="text-xs text-muted-foreground">{formatFileSize(file.size)}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(idx)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3">
