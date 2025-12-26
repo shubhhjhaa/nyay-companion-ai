@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { caseDescription, initialAnalysis, conversationHistory, action } = await req.json();
+    const { caseDescription, initialAnalysis, conversationHistory, action, attachedFiles } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -25,8 +25,30 @@ serve(async (req) => {
     }
 
     console.log('Detailed analysis action:', action);
+    console.log('Attached files:', attachedFiles?.length || 0);
 
     const caseType = initialAnalysis?.caseType || 'General Legal Issue';
+
+    // Build file context if files are attached
+    let fileContext = '';
+    if (attachedFiles && attachedFiles.length > 0) {
+      fileContext = `
+
+ATTACHED DOCUMENTS FOR ANALYSIS:
+The user has attached ${attachedFiles.length} document(s) for your review:
+${attachedFiles.map((f: any, i: number) => `
+Document ${i + 1}: ${f.name} (${f.type})
+${f.type === 'text/plain' ? `Content: ${f.content}` : `[Binary file - analyze based on filename and type]`}
+`).join('\n')}
+
+IMPORTANT: When analyzing attached documents:
+- For emails: Look for dates, sender/receiver, key claims, threats, promises
+- For receipts/bills: Extract amounts, dates, items, seller details
+- For agreements/contracts: Identify key terms, obligations, breach indicators
+- For notices: Check deadlines, demands, legal references
+- Use the document information to provide more accurate and specific guidance
+`;
+    }
 
     const systemPrompt = `You are NyayScan Detailed Analyst, an expert AI legal assistant for Indian users. You provide in-depth, educational legal guidance through adaptive conversation.
 
@@ -34,6 +56,7 @@ INITIAL CASE CONTEXT:
 Case Description: ${caseDescription}
 Case Type: ${caseType}
 Initial Analysis: ${JSON.stringify(initialAnalysis)}
+${fileContext}
 
 YOUR ROLE:
 - You are a smart legal analyst that asks targeted questions based on the SPECIFIC case type
