@@ -275,7 +275,7 @@ const SmartLawyerChat = ({
         sender_id: currentUserId,
         receiver_id: chatPartnerId,
         created_at: new Date().toISOString(),
-        status: 'sent',
+        status: 'pending',
         case_type: caseType,
         isFile,
         fileName
@@ -289,7 +289,7 @@ const SmartLawyerChat = ({
           receiver_id: chatPartnerId,
           case_type: caseType,
           case_id: caseId,
-          status: 'sent'
+          status: 'pending'
         });
 
       if (error) throw error;
