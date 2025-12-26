@@ -159,12 +159,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     localStorage.setItem('dashboard-theme', theme);
-    // Apply theme to document
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Theme is applied directly to dashboard container, not document root
   }, [theme]);
 
   const t = (key: string): string => {
