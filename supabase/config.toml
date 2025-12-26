@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.nyaymail-reply]
 verify_jwt = false
+
+[functions.lawyer-chat-ai]
+verify_jwt = false

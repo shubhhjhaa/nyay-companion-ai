@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Scale, LogOut, LayoutDashboard, Inbox, Briefcase, User, Star, Bell, ArrowLeft, MessageSquare, FileText, Shield } from "lucide-react";
+import { Scale, LogOut, LayoutDashboard, Inbox, Briefcase, User, Star, Bell, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import ActiveCases from "@/components/lawyer/ActiveCases";
 import LawyerProfileSettings from "@/components/lawyer/LawyerProfileSettings";
 import LawyerReviews from "@/components/lawyer/LawyerReviews";
 import CaseDocuments from "@/components/lawyer/CaseDocuments";
-import LawyerChat from "@/components/dashboard/LawyerChat";
+import SmartLawyerChat from "@/components/lawyer/SmartLawyerChat";
 import Notifications from "@/components/dashboard/Notifications";
 
 type ActiveSection = "overview" | "incoming" | "active" | "profile" | "reviews" | "notifications" | "chat" | "documents";
@@ -18,6 +18,8 @@ type ActiveSection = "overview" | "incoming" | "active" | "profile" | "reviews" 
 interface ChatState {
   caseId: string;
   userId: string;
+  caseType?: string;
+  caseDescription?: string;
 }
 
 interface DocumentState {
@@ -46,14 +48,32 @@ const LawyerDashboard = () => {
     { id: "profile" as const, label: "Profile", icon: User },
   ];
 
-  const handleOpenChat = (caseId: string, userId: string) => {
-    setChatState({ caseId, userId });
+  const handleOpenChat = async (caseId: string, userId: string) => {
+    // Fetch case details for AI context
+    const { data: caseData } = await supabase
+      .from('cases')
+      .select('case_type, description')
+      .eq('id', caseId)
+      .maybeSingle();
+    
+    setChatState({ 
+      caseId, 
+      userId,
+      caseType: caseData?.case_type,
+      caseDescription: caseData?.description || undefined
+    });
     setActiveSection("chat");
   };
 
-  const handleViewDocuments = (caseId: string) => {
-    // For now, we need the userId from the case
-    setDocumentState({ caseId, userId: '' });
+  const handleViewDocuments = async (caseId: string) => {
+    // Fetch the user_id from the case
+    const { data: caseData } = await supabase
+      .from('cases')
+      .select('user_id')
+      .eq('id', caseId)
+      .maybeSingle();
+    
+    setDocumentState({ caseId, userId: caseData?.user_id || '' });
     setActiveSection("documents");
   };
 
@@ -77,11 +97,11 @@ const LawyerDashboard = () => {
           return null;
         }
         return (
-          <LawyerChat
-            lawyerId=""
+          <SmartLawyerChat
             chatPartnerId={chatState.userId}
-            chatPartnerName=""
-            userType="lawyer"
+            caseId={chatState.caseId}
+            caseType={chatState.caseType}
+            caseDescription={chatState.caseDescription}
             onBack={() => {
               setChatState(null);
               setActiveSection("active");
