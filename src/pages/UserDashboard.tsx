@@ -16,6 +16,8 @@ import LegalDictionary from "@/components/dashboard/LegalDictionary";
 import PrivacySettings from "@/components/dashboard/PrivacySettings";
 import LawyerChat from "@/components/dashboard/LawyerChat";
 import SnehhChatbot from "@/components/dashboard/SnehhChatbot";
+import DashboardSettings from "@/components/dashboard/DashboardSettings";
+import { DashboardProvider, useDashboard } from "@/contexts/DashboardContext";
 
 type ActiveFeature = "home" | "find" | "nyayscan" | "nyaymail" | "nyaynotice" | "cases" | "saved" | "notifications" | "dictionary" | "privacy" | "chat";
 
@@ -42,8 +44,9 @@ interface NyayScanData {
   analysis: CaseAnalysis | null;
 }
 
-const UserDashboard = () => {
+const UserDashboardContent = () => {
   const navigate = useNavigate();
+  const { t } = useDashboard();
   
   const [activeFeature, setActiveFeature] = useState<ActiveFeature>("home");
   const [prefillCaseType, setPrefillCaseType] = useState<string>("");
@@ -76,18 +79,18 @@ const UserDashboard = () => {
   };
 
   const mainFeatures = [
-    { id: "find" as const, title: "Find Lawyers", description: "Search by location and case type", icon: Search, color: "text-nyay-gold", bgColor: "bg-nyay-gold/10" },
-    { id: "nyayscan" as const, title: "NyayScan", description: "AI-powered case analyzer", icon: MessageSquareText, color: "text-nyay-teal", bgColor: "bg-nyay-teal/10" },
-    { id: "nyaymail" as const, title: "NyayMail", description: "Generate legal emails with AI", icon: Mail, color: "text-nyay-indigo", bgColor: "bg-nyay-indigo/10" },
-    { id: "nyaynotice" as const, title: "NyayNotice", description: "AI Legal Notice Generator", icon: FileText, color: "text-destructive", bgColor: "bg-destructive/10" },
+    { id: "find" as const, titleKey: "find_lawyers", descKey: "find_lawyers_desc", icon: Search, color: "text-nyay-gold", bgColor: "bg-nyay-gold/10" },
+    { id: "nyayscan" as const, titleKey: "nyayscan", descKey: "nyayscan_desc", icon: MessageSquareText, color: "text-nyay-teal", bgColor: "bg-nyay-teal/10" },
+    { id: "nyaymail" as const, titleKey: "nyaymail", descKey: "nyaymail_desc", icon: Mail, color: "text-nyay-indigo", bgColor: "bg-nyay-indigo/10" },
+    { id: "nyaynotice" as const, titleKey: "nyaynotice", descKey: "nyaynotice_desc", icon: FileText, color: "text-destructive", bgColor: "bg-destructive/10" },
   ];
 
   const userFeatures = [
-    { id: "cases" as const, title: "My Cases", description: "View case history & status", icon: Folder, color: "text-nyay-indigo", bgColor: "bg-nyay-indigo/10" },
-    { id: "saved" as const, title: "Saved Lawyers", description: "Your favorite lawyers", icon: Heart, color: "text-destructive", bgColor: "bg-destructive/10" },
-    { id: "notifications" as const, title: "Notifications", description: "Updates & alerts", icon: Bell, color: "text-nyay-gold", bgColor: "bg-nyay-gold/10" },
-    { id: "dictionary" as const, title: "Legal Dictionary", description: "Terms explained simply", icon: Book, color: "text-nyay-teal", bgColor: "bg-nyay-teal/10" },
-    { id: "privacy" as const, title: "Privacy Settings", description: "Data control & security", icon: Shield, color: "text-muted-foreground", bgColor: "bg-muted" },
+    { id: "cases" as const, titleKey: "my_cases", descKey: "my_cases_desc", icon: Folder, color: "text-nyay-indigo", bgColor: "bg-nyay-indigo/10" },
+    { id: "saved" as const, titleKey: "saved_lawyers", descKey: "saved_lawyers_desc", icon: Heart, color: "text-destructive", bgColor: "bg-destructive/10" },
+    { id: "notifications" as const, titleKey: "notifications", descKey: "notifications_desc", icon: Bell, color: "text-nyay-gold", bgColor: "bg-nyay-gold/10" },
+    { id: "dictionary" as const, titleKey: "legal_dictionary", descKey: "legal_dictionary_desc", icon: Book, color: "text-nyay-teal", bgColor: "bg-nyay-teal/10" },
+    { id: "privacy" as const, titleKey: "privacy_settings", descKey: "privacy_settings_desc", icon: Shield, color: "text-muted-foreground", bgColor: "bg-muted" },
   ];
 
   const handleFindLawyersFromScan = (caseType: string, caseDescription: string, analysis: CaseAnalysis | null) => {
@@ -166,15 +169,15 @@ const UserDashboard = () => {
                   <User className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Welcome back,</p>
+                  <p className="text-sm text-muted-foreground">{t('welcome_back')}</p>
                   <h1 className="text-4xl md:text-5xl font-display font-semibold text-foreground tracking-tight">
                     {userName.split(' ')[0]}
                   </h1>
                 </div>
               </div>
             )}
-            <h2 className="text-2xl font-semibold text-foreground mb-2">How can we help you today?</h2>
-            <p className="text-muted-foreground mb-8">Choose a service to get started</p>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">{t('how_can_we_help')}</h2>
+            <p className="text-muted-foreground mb-8">{t('choose_service')}</p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {mainFeatures.map((feature) => (
@@ -183,16 +186,16 @@ const UserDashboard = () => {
                     <div className={`w-12 h-12 rounded-xl ${feature.bgColor} flex items-center justify-center mb-3`}>
                       <feature.icon className={`w-6 h-6 ${feature.color}`} />
                     </div>
-                    <CardTitle className="text-lg">{feature.title}</CardTitle>
+                    <CardTitle className="text-lg">{t(feature.titleKey)}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <p className="text-sm text-muted-foreground">{t(feature.descKey)}</p>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <h2 className="text-xl font-semibold mb-4">Quick Access</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('quick_access')}</h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {userFeatures.map((feature) => (
                 <Card key={feature.id} className="cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5" onClick={() => setActiveFeature(feature.id)}>
@@ -200,7 +203,7 @@ const UserDashboard = () => {
                     <div className={`w-10 h-10 rounded-xl ${feature.bgColor} flex items-center justify-center mx-auto mb-2`}>
                       <feature.icon className={`w-5 h-5 ${feature.color}`} />
                     </div>
-                    <p className="font-medium text-sm">{feature.title}</p>
+                    <p className="font-medium text-sm">{t(feature.titleKey)}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -232,23 +235,34 @@ const UserDashboard = () => {
             </div>
             <span className="text-xl font-bold">Nyay<span className="text-nyay-gold">Buddy</span></span>
           </div>
-          <Button variant="ghost" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-2">
+            <DashboardSettings />
+            <Button variant="ghost" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              {t('logout')}
+            </Button>
+          </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
         {renderContent()}
         <p className="text-xs text-muted-foreground text-center mt-8">
-          NyayBuddy provides AI-assisted legal guidance and does not replace professional legal consultation.
+          {t('disclaimer')}
         </p>
       </div>
 
       {/* Snehh AI Chatbot */}
       <SnehhChatbot />
     </div>
+  );
+};
+
+const UserDashboard = () => {
+  return (
+    <DashboardProvider>
+      <UserDashboardContent />
+    </DashboardProvider>
   );
 };
 
