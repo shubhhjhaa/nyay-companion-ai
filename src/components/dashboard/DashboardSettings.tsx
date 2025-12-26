@@ -1,4 +1,4 @@
-import { Moon, Sun, Languages } from "lucide-react";
+import { Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -6,11 +6,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch";
 import { useDashboard } from "@/contexts/DashboardContext";
 
 const DashboardSettings = () => {
-  const { language, setLanguage, theme, setTheme, t } = useDashboard();
+  const { language, setLanguage } = useDashboard();
 
   return (
     <div className="flex items-center gap-2">
@@ -39,26 +38,6 @@ const DashboardSettings = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* Theme Toggle */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-        className="gap-2"
-      >
-        {theme === 'light' ? (
-          <>
-            <Moon className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('dark_mode')}</span>
-          </>
-        ) : (
-          <>
-            <Sun className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('light_mode')}</span>
-          </>
-        )}
-      </Button>
     </div>
   );
 };

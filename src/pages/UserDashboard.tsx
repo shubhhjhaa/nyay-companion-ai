@@ -213,13 +213,8 @@ const UserDashboardContent = () => {
     }
   };
 
-  const { theme } = useDashboard();
-
   return (
-    <div 
-      className="min-h-screen bg-background" 
-      data-theme={theme}
-    >
+    <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
