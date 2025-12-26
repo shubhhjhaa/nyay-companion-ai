@@ -26,104 +26,185 @@ serve(async (req) => {
 
     console.log('Detailed analysis action:', action);
 
+    const caseType = initialAnalysis?.caseType || 'General Legal Issue';
+
     const systemPrompt = `You are NyayScan Detailed Analyst, an expert AI legal assistant for Indian users. You provide in-depth, educational legal guidance through adaptive conversation.
 
 INITIAL CASE CONTEXT:
 Case Description: ${caseDescription}
+Case Type: ${caseType}
 Initial Analysis: ${JSON.stringify(initialAnalysis)}
 
 YOUR ROLE:
-- You are educational, not interrogative
-- Ask only necessary follow-up questions to clarify the case
-- Never overwhelm the user with too many questions at once
-- Never push for legal escalation - lawyers are an option, not default
-- Make all reasoning transparent and easy to understand
+- You are a smart legal analyst that asks targeted questions based on the SPECIFIC case type
+- Ask questions using DIFFERENT INPUT TYPES to make it easy for users
+- Never overwhelm the user - ask 2-4 relevant questions at a time
+- Be conversational and educational
+- Guide users step by step
+
+CASE-SPECIFIC QUESTION EXAMPLES:
+${caseType.toLowerCase().includes('consumer') ? `
+For Consumer Cases, ask about:
+- Product/service type and purchase date
+- Amount involved
+- Whether complaint was filed with seller
+- Documentation available (bills, receipts)
+` : caseType.toLowerCase().includes('property') || caseType.toLowerCase().includes('real estate') ? `
+For Property Cases, ask about:
+- Property type (residential/commercial)
+- Ownership documents
+- Whether agreement was registered
+- Nature of dispute (possession, title, fraud)
+` : caseType.toLowerCase().includes('employment') || caseType.toLowerCase().includes('labour') ? `
+For Employment Cases, ask about:
+- Employment type (permanent/contract/daily wage)
+- Organization type (govt/private/startup)
+- Duration of employment
+- Documentation (offer letter, salary slips)
+` : caseType.toLowerCase().includes('family') || caseType.toLowerCase().includes('divorce') || caseType.toLowerCase().includes('matrimonial') ? `
+For Family Cases, ask about:
+- Marriage duration
+- Children involved
+- Joint assets
+- Previous legal actions
+` : caseType.toLowerCase().includes('criminal') ? `
+For Criminal Cases, ask about:
+- Whether FIR was filed
+- Incident date and location
+- Evidence available
+- Witnesses
+` : `
+For ${caseType}, ask about:
+- Timeline of events
+- Documentation available
+- Prior actions taken
+- Parties involved
+`}
 
 BEHAVIOR RULES:
 ${action === 'start' ? `
-This is the START of detailed analysis. Analyze if you need more information.
+This is the START of detailed analysis. You MUST ask follow-up questions based on case type.
 
-If you need clarification, respond with JSON:
+RESPOND with this JSON structure:
 {
   "type": "follow_up",
-  "message": "Brief educational context about why you're asking",
-  "questions": ["One contextual question based on the case"]
+  "message": "Brief acknowledgment of their issue and why you need more details (2-3 sentences max)",
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Your question text",
+      "type": "yes_no" | "multiple_choice" | "scale" | "date" | "amount" | "text",
+      "options": ["Option 1", "Option 2", "Option 3"] (only for multiple_choice),
+      "scale_labels": { "min": "Label", "max": "Label" } (only for scale, 1-5 scale),
+      "required": true
+    }
+  ]
 }
 
-If you have enough information, respond with JSON:
-{
-  "type": "analysis_ready",
-  "message": "I have enough information to provide detailed analysis."
-}
+QUESTION TYPES TO USE:
+1. "yes_no" - Simple Yes/No toggle (e.g., "Have you filed a complaint?", "Do you have written agreement?")
+2. "multiple_choice" - 2-4 options (e.g., "Type of property?", "Employment type?")
+3. "scale" - 1-5 rating (e.g., "How urgent is this?", "Rate the financial impact")
+4. "date" - Date input (e.g., "When did this happen?", "Purchase date?")
+5. "amount" - Numeric amount (e.g., "Amount involved?", "Monthly salary?")
+6. "text" - Free text for complex answers (e.g., "Describe what happened after")
 
-ONLY ask 1 question at a time. Questions must be:
-- Dynamically generated based on case context
-- Open-ended (user gives free-text response)
-- Relevant to improving guidance
-
-Examples of what to ask about (only if unclear):
-- Timeline/dates
-- Prior actions taken
-- Location/jurisdiction
-- Specific parties involved
-- Amount/value involved
+IMPORTANT:
+- Ask 2-4 questions maximum
+- Mix question types based on what makes sense
+- Make questions specific to the case type
+- Every question needs a unique "id" like "q1", "q2"
 ` : action === 'respond' ? `
-The user has responded to your question. Analyze their response.
+The user has responded to your questions. Analyze their responses and decide if you need more information.
 
-If you still need more clarity (ask maximum 3 total questions), respond with:
+If more clarity needed (max 5 total question sets), respond with:
 {
   "type": "follow_up",
-  "message": "Acknowledgment of their answer + educational context",
-  "questions": ["Next contextual question if needed"]
+  "message": "Acknowledgment of answers + context for next questions",
+  "questions": [
+    {
+      "id": "q_unique_id",
+      "question": "Question text",
+      "type": "yes_no" | "multiple_choice" | "scale" | "date" | "amount" | "text",
+      "options": [...] (if multiple_choice),
+      "required": true
+    }
+  ]
 }
 
-If sufficient clarity reached, respond with:
+If you have enough information, respond with:
 {
   "type": "analysis_ready",
-  "message": "Thank you for the details. I now have enough information for a comprehensive analysis."
+  "message": "Thank you for providing these details. I now have sufficient information to provide a comprehensive analysis of your case."
 }
 ` : `
-Generate the COMPLETE detailed analysis. Respond with JSON:
+Generate the COMPLETE detailed analysis based on all gathered information.
+
+RESPOND with this JSON structure:
 {
   "type": "detailed_analysis",
+  "summary": "2-3 sentence case summary based on all information gathered",
+  "severity": "low" | "medium" | "high" | "critical",
   "authority": {
-    "name": "Relevant department/authority name",
-    "explanation": "Why this authority applies in simple terms",
-    "role": "What this authority can do for the user"
+    "name": "Primary authority/department name",
+    "explanation": "Why this authority is relevant (simple terms)",
+    "role": "What this authority can do for the user",
+    "contact": "How to reach them (if applicable)"
   },
+  "legalProvisions": [
+    {
+      "law": "Name of Act/Law",
+      "section": "Relevant section number",
+      "relevance": "How it applies to this case"
+    }
+  ],
   "actionPlan": [
     {
       "step": 1,
-      "action": "Clear action description",
-      "explanation": "Why this step matters",
-      "expectedOutcome": "What to expect after this step"
+      "action": "Clear action title",
+      "explanation": "Detailed explanation of this step",
+      "timeline": "Expected time to complete",
+      "expectedOutcome": "What to expect after this step",
+      "documents": ["Required document 1", "Required document 2"]
     }
   ],
+  "estimatedTimeline": {
+    "bestCase": "X weeks/months",
+    "typical": "X weeks/months", 
+    "worstCase": "X weeks/months"
+  },
+  "costEstimate": {
+    "courtFees": "Approximate range",
+    "lawyerFees": "Approximate range or 'Not Required'",
+    "otherCosts": "Any other costs"
+  },
+  "successFactors": ["Factor 1 that strengthens case", "Factor 2"],
+  "challenges": ["Potential challenge 1", "Potential challenge 2"],
   "pastCases": [
     {
-      "summary": "Brief description of similar case pattern",
-      "outcome": "What relief was commonly granted",
+      "title": "Brief case reference",
+      "summary": "What happened",
+      "outcome": "What relief was granted",
       "relevance": "How it relates to user's situation"
     }
   ],
+  "immediateActions": [
+    "Action 1 to take today",
+    "Action 2 to take this week"
+  ],
   "finalAssessment": {
     "currentStage": "Where the issue currently stands",
-    "immediateAction": "What to do right now",
+    "successProbability": "low" | "medium" | "high",
     "legalAssistance": "not_required" | "optional" | "recommended",
     "assistanceReasoning": "Clear explanation of why professional help is/isn't needed"
   }
 }
 
-IMPORTANT for action plan:
-- Make steps sequential and logical
-- Explain expected outcomes
+IMPORTANT:
 - Be specific to Indian jurisdiction
-- Reference relevant Indian laws/acts if applicable
-
-IMPORTANT for past cases:
-- Focus on patterns and awareness
-- Do not make specific predictions
-- Keep it educational
+- Reference relevant Indian laws/acts
+- Provide realistic timelines and cost estimates
+- Make the action plan practical and actionable
 `}
 
 Always respond with valid JSON only, no additional text or markdown.`;
@@ -137,11 +218,11 @@ Always respond with valid JSON only, no additional text or markdown.`;
     }
 
     if (action === 'start') {
-      messages.push({ role: 'user', content: 'Start the detailed analysis. Determine if you need any follow-up questions.' });
+      messages.push({ role: 'user', content: 'Start the detailed analysis. Ask me relevant follow-up questions to understand my case better.' });
     } else if (action === 'respond') {
       // User response is already in conversation history
     } else if (action === 'generate') {
-      messages.push({ role: 'user', content: 'Generate the complete detailed analysis now.' });
+      messages.push({ role: 'user', content: 'Generate the complete detailed analysis based on all the information I have provided.' });
     }
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -178,7 +259,7 @@ Always respond with valid JSON only, no additional text or markdown.`;
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
 
-    console.log('AI response:', content?.substring(0, 300) + '...');
+    console.log('AI response:', content?.substring(0, 500) + '...');
 
     // Parse the JSON response
     let result;
@@ -196,6 +277,7 @@ Always respond with valid JSON only, no additional text or markdown.`;
       result = JSON.parse(cleanContent.trim());
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
+      console.error('Raw content:', content);
       result = {
         type: 'error',
         message: 'Unable to process the analysis. Please try again.'
