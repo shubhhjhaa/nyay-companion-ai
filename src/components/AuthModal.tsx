@@ -87,7 +87,7 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
         // Validate that selected user type matches the registered type
         if (actualUserType !== userType) {
           await supabase.auth.signOut();
-          toast.error(`This account is registered as a ${actualUserType}. Please select the correct account type.`);
+          toast.error("Enter valid details");
           return;
         }
 
