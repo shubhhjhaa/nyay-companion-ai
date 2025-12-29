@@ -53,24 +53,36 @@ const UserDashboardContent = () => {
   const [chatState, setChatState] = useState<ChatState | null>(null);
   const [nyayScanData, setNyayScanData] = useState<NyayScanData | null>(null);
   const [userName, setUserName] = useState<string>("");
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const checkAuthAndFetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', user.id)
-          .single();
-        
-        if (profile?.full_name) {
-          setUserName(profile.full_name);
-        }
+      
+      if (!user) {
+        navigate("/");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, user_type')
+        .eq('id', user.id)
+        .single();
+      
+      // Check if user is authorized to access this dashboard
+      if (profile?.user_type === 'lawyer') {
+        navigate("/lawyer-dashboard");
+        return;
+      }
+
+      setIsAuthorized(true);
+      if (profile?.full_name) {
+        setUserName(profile.full_name);
       }
     };
-    fetchUserProfile();
-  }, []);
+    checkAuthAndFetchProfile();
+  }, [navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -212,6 +224,20 @@ const UserDashboardContent = () => {
         );
     }
   };
+
+  // Show loading while checking authorization
+  if (isAuthorized === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-hero flex items-center justify-center mx-auto mb-4">
+            <Scale className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

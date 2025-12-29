@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Scale, LogOut, LayoutDashboard, Inbox, Briefcase, User, Star, Bell, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,33 @@ const LawyerDashboard = () => {
   const [activeSection, setActiveSection] = useState<ActiveSection>("overview");
   const [chatState, setChatState] = useState<ChatState | null>(null);
   const [documentState, setDocumentState] = useState<DocumentState | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        navigate("/");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', user.id)
+        .single();
+      
+      // Check if user is authorized to access lawyer dashboard
+      if (profile?.user_type !== 'lawyer') {
+        navigate("/user-dashboard");
+        return;
+      }
+
+      setIsAuthorized(true);
+    };
+    checkAuth();
+  }, [navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -127,6 +154,20 @@ const LawyerDashboard = () => {
         return <LawyerOverview />;
     }
   };
+
+  // Show loading while checking authorization
+  if (isAuthorized === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-hero flex items-center justify-center mx-auto mb-4">
+            <Scale className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

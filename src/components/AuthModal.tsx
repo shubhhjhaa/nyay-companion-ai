@@ -66,15 +66,33 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
 
     try {
       if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: authData, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) throw error;
 
+        // Fetch user's actual profile to get their registered user_type
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', authData.user.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        const actualUserType = profile?.user_type || 'user';
+
+        // Validate that selected user type matches the registered type
+        if (actualUserType !== userType) {
+          await supabase.auth.signOut();
+          toast.error(`This account is registered as a ${actualUserType}. Please select the correct account type.`);
+          return;
+        }
+
         toast.success("Welcome back!");
-        onAuthSuccess(userType);
+        onAuthSuccess(actualUserType as "user" | "lawyer");
       } else {
         // Register
         const { data, error } = await supabase.auth.signUp({
