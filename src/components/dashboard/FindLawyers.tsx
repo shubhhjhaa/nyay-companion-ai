@@ -254,6 +254,33 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer, nyayScanData }
         return;
       }
 
+      // Check if an active case already exists with this lawyer for the same case type
+      const { data: existingCases, error: existingError } = await supabase
+        .from('cases')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('lawyer_id', lawyer.id)
+        .eq('case_type', selectedCaseType || 'General Consultation')
+        .not('status', 'eq', 'disposed')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (existingError) {
+        console.error('Error checking existing cases:', existingError);
+      }
+
+      // If an active case exists, use that instead of creating a new one
+      if (existingCases && existingCases.length > 0) {
+        const existingCase = existingCases[0];
+        toast.info(`You already have an active case with ${lawyer.name}. Opening existing chat.`);
+        
+        if (onConnectLawyer) {
+          onConnectLawyer(lawyer.id, selectedCaseType, existingCase.id);
+        }
+        setIsConnecting(false);
+        return;
+      }
+
       // Get user profile for name and location
       const { data: userProfile } = await supabase
         .from('profiles')
@@ -301,7 +328,7 @@ const FindLawyers = ({ prefillCaseType, onClear, onConnectLawyer, nyayScanData }
         toast.dismiss();
       }
 
-      // Create a case for this connection
+      // Create a new case for this connection
       const { data: newCase, error: caseError } = await supabase
         .from('cases')
         .insert({
