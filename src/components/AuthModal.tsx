@@ -123,7 +123,16 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
         }
       }
     } catch (error: any) {
-      toast.error(error.message || "Authentication failed");
+      if (mode === "login") {
+        toast.error("Enter valid details");
+      } else {
+        // For registration, show more specific error messages
+        if (error.message?.includes("already registered")) {
+          toast.error("This email is already registered. Please login instead.");
+        } else {
+          toast.error(error.message || "Registration failed. Please try again.");
+        }
+      }
     } finally {
       setIsLoading(false);
     }
