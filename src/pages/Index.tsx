@@ -8,25 +8,36 @@ import { supabase } from "@/integrations/supabase/client";
 const Index = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Check for existing session on mount (not during active authentication)
+    const checkExistingSession = async () => {
+      if (isAuthenticating) return;
+      
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        // Check user type from metadata
-        const userType = session.user.user_metadata?.user_type || "user";
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        
+        const userType = profile?.user_type || "user";
         if (userType === "lawyer") {
           navigate("/lawyer-dashboard");
         } else {
           navigate("/user-dashboard");
         }
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    checkExistingSession();
+  }, [navigate, isAuthenticating]);
 
   const handleAuthSuccess = (userType: "user" | "lawyer") => {
+    setIsAuthenticating(false);
     setShowAuthModal(false);
     if (userType === "lawyer") {
       navigate("/lawyer-dashboard");
@@ -35,16 +46,26 @@ const Index = () => {
     }
   };
 
+  const handleOpenAuthModal = () => {
+    setIsAuthenticating(true);
+    setShowAuthModal(true);
+  };
+
+  const handleCloseAuthModal = () => {
+    setIsAuthenticating(false);
+    setShowAuthModal(false);
+  };
+
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
 
   return (
     <>
-      <LandingPage onAccountClick={() => setShowAuthModal(true)} />
+      <LandingPage onAccountClick={handleOpenAuthModal} />
       <AuthModal
         isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
+        onClose={handleCloseAuthModal}
         onAuthSuccess={handleAuthSuccess}
       />
     </>
