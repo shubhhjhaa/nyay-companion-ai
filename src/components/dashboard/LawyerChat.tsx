@@ -245,33 +245,59 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
         fileName
       };
 
-      // For demo mode, just add to local state
+      // For demo mode, just add to local state and get AI response
       if (isDemoMode) {
         setMessages(prev => [...prev, newMsg]);
         setNewMessage("");
         
-        // Simulate lawyer response after a delay
-        setTimeout(() => {
-          const responses = [
-            "Thank you for reaching out. I have reviewed your case details.",
-            "I understand your concern. Let me look into this matter.",
-            "I will need some additional documents to proceed further.",
-            "Based on the information provided, I can assist you with this case.",
-            "Please share any supporting documents you have for this case."
-          ];
-          const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        // Get AI auto-reply
+        try {
+          const conversationHistory = messages.map(m => ({
+            role: m.sender_id === currentUserId ? 'user' : 'assistant',
+            content: m.content
+          }));
+
+          const { data, error } = await supabase.functions.invoke('lawyer-auto-reply', {
+            body: {
+              userMessage: messageContent,
+              caseType: caseType,
+              lawyerName: partnerInfo?.name,
+              conversationHistory
+            }
+          });
+
+          if (error) throw error;
+
+          const aiReply = data?.reply || "Thank you for your message. The lawyer will respond soon.\n\n— Sent by AI Assistant";
           
-          const lawyerMsg: Message = {
-            id: (Date.now() + 1).toString(),
-            content: randomResponse,
-            sender_id: receiverId!,
-            receiver_id: currentUserId,
-            created_at: new Date().toISOString(),
-            status: 'sent',
-            case_type: caseType
-          };
-          setMessages(prev => [...prev, lawyerMsg]);
-        }, 1500 + Math.random() * 2000);
+          setTimeout(() => {
+            const lawyerMsg: Message = {
+              id: (Date.now() + 1).toString(),
+              content: aiReply,
+              sender_id: receiverId!,
+              receiver_id: currentUserId,
+              created_at: new Date().toISOString(),
+              status: 'sent',
+              case_type: caseType
+            };
+            setMessages(prev => [...prev, lawyerMsg]);
+          }, 1000 + Math.random() * 1000);
+        } catch (aiError) {
+          console.error('AI auto-reply error:', aiError);
+          // Fallback response
+          setTimeout(() => {
+            const lawyerMsg: Message = {
+              id: (Date.now() + 1).toString(),
+              content: `Thank you for your message. ${partnerInfo?.name || 'The lawyer'} is currently offline and will respond soon.\n\n— Sent by AI Assistant (Lawyer will respond soon)`,
+              sender_id: receiverId!,
+              receiver_id: currentUserId,
+              created_at: new Date().toISOString(),
+              status: 'sent',
+              case_type: caseType
+            };
+            setMessages(prev => [...prev, lawyerMsg]);
+          }, 1500);
+        }
         
         toast.success("Message sent to lawyer");
         return;
