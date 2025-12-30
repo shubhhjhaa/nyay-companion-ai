@@ -318,6 +318,53 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
 
       setMessages(prev => [...prev, newMsg]);
       setNewMessage("");
+
+      // Trigger AI auto-reply for real lawyers (assuming offline)
+      try {
+        const conversationHistory = messages.map(m => ({
+          role: m.sender_id === currentUserId ? 'user' : 'assistant',
+          content: m.content
+        }));
+
+        const { data: aiData, error: aiError } = await supabase.functions.invoke('lawyer-auto-reply', {
+          body: {
+            userMessage: messageContent,
+            caseType: caseType,
+            lawyerName: partnerInfo?.name,
+            conversationHistory
+          }
+        });
+
+        if (!aiError && aiData?.reply) {
+          // Save AI reply to database
+          const { error: replyError } = await supabase
+            .from('messages')
+            .insert({
+              content: aiData.reply,
+              sender_id: receiverId,
+              receiver_id: currentUserId,
+              case_type: caseType,
+              status: 'sent'
+            });
+
+          if (!replyError) {
+            const aiReplyMsg: Message = {
+              id: (Date.now() + 1).toString(),
+              content: aiData.reply,
+              sender_id: receiverId!,
+              receiver_id: currentUserId,
+              created_at: new Date().toISOString(),
+              status: 'sent',
+              case_type: caseType
+            };
+            setTimeout(() => {
+              setMessages(prev => [...prev, aiReplyMsg]);
+            }, 1000);
+          }
+        }
+      } catch (aiError) {
+        console.error('AI auto-reply error:', aiError);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error("Failed to send message");
