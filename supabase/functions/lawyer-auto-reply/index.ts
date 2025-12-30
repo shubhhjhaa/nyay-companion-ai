@@ -71,10 +71,9 @@ Important: You MUST end every response with exactly this line on a new line:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'openai/gpt-5-nano',
         messages,
-        max_tokens: 500,
-        temperature: 0.7,
+        max_completion_tokens: 500,
       }),
     });
 
