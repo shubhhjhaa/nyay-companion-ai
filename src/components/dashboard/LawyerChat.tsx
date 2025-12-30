@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Paperclip, ArrowLeft, Phone, Video, MoreVertical, Check, CheckCheck, Image, FileText, X, BadgeCheck } from "lucide-react";
+import { Send, Paperclip, ArrowLeft, Phone, Video, MoreVertical, Check, CheckCheck, Image, FileText, X, BadgeCheck, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -493,14 +493,24 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
                 {msgs.map((msg) => {
                   const isOwn = msg.sender_id === currentUserId;
                   const isFileMessage = msg.content.includes('supabase') && msg.content.includes('storage');
+                  const isAiMessage = !isOwn && (msg.content.includes('— Sent by AI Assistant') || msg.content.includes('— Sent by AI'));
                   
                   return (
                     <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2`}>
                       <div className={`max-w-[75%] ${isOwn ? 'order-1' : ''}`}>
+                        {/* AI Badge */}
+                        {isAiMessage && (
+                          <div className="flex items-center gap-1 mb-1">
+                            <Bot className="w-3 h-3 text-blue-500" />
+                            <span className="text-xs text-blue-500 font-medium">AI Assistant</span>
+                          </div>
+                        )}
                         <div className={`rounded-2xl px-4 py-2 ${
                           isOwn 
                             ? 'bg-primary text-primary-foreground rounded-br-md' 
-                            : 'bg-card text-foreground border border-border rounded-bl-md'
+                            : isAiMessage
+                              ? 'bg-blue-50 dark:bg-blue-950/30 text-foreground border border-blue-200 dark:border-blue-800 rounded-bl-md'
+                              : 'bg-card text-foreground border border-border rounded-bl-md'
                         }`}>
                           {isFileMessage ? (
                             <a 
