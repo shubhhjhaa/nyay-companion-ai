@@ -19,7 +19,6 @@ interface RequestBody {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -44,36 +43,49 @@ serve(async (req) => {
       throw new Error('API configuration error');
     }
 
-    // Build conversation context
     const previousMessages = conversationHistory.map(msg => ({
       role: msg.role as 'user' | 'assistant',
       content: msg.content
     }));
 
-    const systemPrompt = `You are an AI Legal Assistant representing ${lawyerName || 'the lawyer'}. The lawyer is currently offline, so you are handling initial client communications.
+    // Enhanced system prompt - ONLY ask for missing info/documents, NO legal advice
+    const systemPrompt = `You are an AI Assistant for ${lawyerName || 'the lawyer'}. The lawyer is currently offline/unavailable.
 
-Your role:
-1. Acknowledge the user's message warmly and professionally
-2. Understand what the user is asking about their legal matter
-3. If any critical information is missing (like case details, dates, documents, specific questions), politely ask for it
-4. Provide general guidance WITHOUT giving specific legal advice (remind them the lawyer will provide detailed legal advice)
-5. Keep track of the case type: "${caseType || 'General Consultation'}"
-6. If there's case context: "${caseDescription || 'No specific case details provided yet'}"
+YOUR ONLY PURPOSE:
+1. Acknowledge the user's message politely and professionally
+2. Analyze what information or documents might be missing for their case
+3. Ask specific clarifying questions to gather missing details
 
-Guidelines:
-- Be empathetic and supportive
-- Keep responses concise but helpful (2-3 paragraphs max)
-- Ask clarifying questions if the user's query is vague. For example:
-  * Ask what specific issue they're facing
-  * Ask for relevant dates or timeline
-  * Ask if they have any documents related to the case
-  * Ask about the parties involved
-- Never provide specific legal advice - only general information
-- If user asks about fees, tell them the lawyer will discuss this directly
-- If user seems distressed, provide reassurance that legal help is available
+WHAT YOU MUST ASK FOR (if not already provided):
+- Nature of the legal issue (if unclear)
+- Relevant dates and timeline
+- Parties involved in the case
+- Supporting documents (agreements, notices, receipts, photos, etc.)
+- Previous legal communications or actions taken
+- Specific outcome the user is seeking
 
-Important: You MUST end every response with exactly this line on a new line:
-"— Sent by AI Assistant (${lawyerName || 'Lawyer'} will respond soon)"`;
+Case Type: "${caseType || 'Not specified'}"
+Case Context: "${caseDescription || 'No details provided yet'}"
+
+STRICT RULES - YOU MUST FOLLOW:
+❌ NEVER provide legal advice or opinions
+❌ NEVER suggest what the user should do legally
+❌ NEVER interpret laws or legal rights
+❌ NEVER make any legal recommendations
+❌ NEVER promise any outcomes
+
+✅ ONLY ask for missing information
+✅ ONLY ask for required documents
+✅ ONLY acknowledge and reassure the user
+✅ Keep responses concise (2-3 short paragraphs)
+
+RESPONSE FORMAT:
+1. Brief acknowledgment of their message
+2. 2-3 specific questions about missing info/documents
+3. Reassurance that the lawyer will review everything
+
+MANDATORY ENDING (include exactly):
+"⚠️ This is an AI-generated response for assistance only. It does not constitute legal advice. ${lawyerName || 'The lawyer'} will personally review and respond to your query soon."`;
 
     const messages = [
       { role: 'system' as const, content: systemPrompt },
@@ -81,7 +93,7 @@ Important: You MUST end every response with exactly this line on a new line:
       { role: 'user' as const, content: userMessage }
     ];
 
-    console.log('Sending request to AI gateway for auto-reply');
+    console.log('Sending request to AI gateway');
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -90,15 +102,22 @@ Important: You MUST end every response with exactly this line on a new line:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-5-nano',
+        model: 'google/gemini-2.5-flash',
         messages,
-        max_completion_tokens: 500,
+        max_completion_tokens: 600,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI Gateway error:', response.status, errorText);
+      
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again later.');
+      }
+      if (response.status === 402) {
+        throw new Error('AI service credits exhausted.');
+      }
       throw new Error(`AI service error: ${response.status}`);
     }
 
@@ -109,7 +128,7 @@ Important: You MUST end every response with exactly this line on a new line:
       throw new Error('No response from AI');
     }
 
-    console.log('AI auto-reply generated successfully:', aiReply.substring(0, 100));
+    console.log('AI auto-reply generated successfully');
 
     // Save to database if requested
     if (saveToDatabase && lawyerId && userId) {
@@ -127,13 +146,13 @@ Important: You MUST end every response with exactly this line on a new line:
               sender_id: lawyerId,
               receiver_id: userId,
               case_type: caseType,
-              status: 'sent'
+              status: 'ai_sent'
             });
           
           if (insertError) {
             console.error('Error saving AI reply to database:', insertError);
           } else {
-            console.log('AI reply saved to database successfully');
+            console.log('AI reply saved to database with ai_sent status');
           }
         }
       } catch (dbError) {
@@ -153,14 +172,25 @@ Important: You MUST end every response with exactly this line on a new line:
   } catch (error) {
     console.error('Error in lawyer-auto-reply:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    const fallbackReply = `Thank you for your message. The lawyer is currently unavailable.
+
+To help prepare your case, please share:
+• Any relevant documents (agreements, notices, receipts)
+• Key dates and timeline of events
+• Names of parties involved
+
+⚠️ This is an AI-generated response for assistance only. It does not constitute legal advice. The lawyer will personally review and respond to your query soon.`;
+
     return new Response(
       JSON.stringify({ 
         success: false, 
         error: errorMessage,
-        reply: `Thank you for your message. The lawyer is currently offline and will respond to you soon. In the meantime, please feel free to share any additional details about your case.\n\n— Sent by AI Assistant (Lawyer will respond soon)`
+        reply: fallbackReply,
+        isAiGenerated: true
       }),
       { 
-        status: 200, // Return 200 with fallback message
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
