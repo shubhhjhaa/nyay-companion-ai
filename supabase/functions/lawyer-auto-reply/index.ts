@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,7 +12,10 @@ interface RequestBody {
   caseType?: string;
   caseDescription?: string;
   lawyerName?: string;
+  lawyerId?: string;
+  userId?: string;
   conversationHistory?: Array<{ role: string; content: string }>;
+  saveToDatabase?: boolean;
 }
 
 serve(async (req) => {
@@ -21,7 +25,18 @@ serve(async (req) => {
   }
 
   try {
-    const { userMessage, caseType, caseDescription, lawyerName, conversationHistory = [] } = await req.json() as RequestBody;
+    const { 
+      userMessage, 
+      caseType, 
+      caseDescription, 
+      lawyerName, 
+      lawyerId,
+      userId,
+      conversationHistory = [],
+      saveToDatabase = false
+    } = await req.json() as RequestBody;
+
+    console.log('Received request:', { userMessage, caseType, lawyerName, lawyerId, userId, saveToDatabase });
 
     const apiKey = Deno.env.get('LOVABLE_API_KEY');
     if (!apiKey) {
@@ -48,7 +63,11 @@ Your role:
 Guidelines:
 - Be empathetic and supportive
 - Keep responses concise but helpful (2-3 paragraphs max)
-- Ask clarifying questions if the user's query is vague
+- Ask clarifying questions if the user's query is vague. For example:
+  * Ask what specific issue they're facing
+  * Ask for relevant dates or timeline
+  * Ask if they have any documents related to the case
+  * Ask about the parties involved
 - Never provide specific legal advice - only general information
 - If user asks about fees, tell them the lawyer will discuss this directly
 - If user seems distressed, provide reassurance that legal help is available
@@ -90,7 +109,37 @@ Important: You MUST end every response with exactly this line on a new line:
       throw new Error('No response from AI');
     }
 
-    console.log('AI auto-reply generated successfully');
+    console.log('AI auto-reply generated successfully:', aiReply.substring(0, 100));
+
+    // Save to database if requested
+    if (saveToDatabase && lawyerId && userId) {
+      try {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL');
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+        
+        if (supabaseUrl && supabaseServiceKey) {
+          const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+          
+          const { error: insertError } = await supabaseAdmin
+            .from('messages')
+            .insert({
+              content: aiReply,
+              sender_id: lawyerId,
+              receiver_id: userId,
+              case_type: caseType,
+              status: 'sent'
+            });
+          
+          if (insertError) {
+            console.error('Error saving AI reply to database:', insertError);
+          } else {
+            console.log('AI reply saved to database successfully');
+          }
+        }
+      } catch (dbError) {
+        console.error('Database save error:', dbError);
+      }
+    }
 
     return new Response(
       JSON.stringify({ 

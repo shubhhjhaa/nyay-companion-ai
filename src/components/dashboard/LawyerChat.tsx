@@ -326,41 +326,38 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
           content: m.content
         }));
 
+        console.log('Calling lawyer-auto-reply edge function...');
+        
         const { data: aiData, error: aiError } = await supabase.functions.invoke('lawyer-auto-reply', {
           body: {
             userMessage: messageContent,
             caseType: caseType,
             lawyerName: partnerInfo?.name,
-            conversationHistory
+            lawyerId: receiverId,
+            userId: currentUserId,
+            conversationHistory,
+            saveToDatabase: true
           }
         });
 
-        if (!aiError && aiData?.reply) {
-          // Save AI reply to database
-          const { error: replyError } = await supabase
-            .from('messages')
-            .insert({
-              content: aiData.reply,
-              sender_id: receiverId,
-              receiver_id: currentUserId,
-              case_type: caseType,
-              status: 'sent'
-            });
+        console.log('AI auto-reply response:', aiData, aiError);
 
-          if (!replyError) {
-            const aiReplyMsg: Message = {
-              id: (Date.now() + 1).toString(),
-              content: aiData.reply,
-              sender_id: receiverId!,
-              receiver_id: currentUserId,
-              created_at: new Date().toISOString(),
-              status: 'sent',
-              case_type: caseType
-            };
-            setTimeout(() => {
-              setMessages(prev => [...prev, aiReplyMsg]);
-            }, 1000);
-          }
+        if (!aiError && aiData?.reply) {
+          // The edge function saves to DB, we just update local state
+          const aiReplyMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            content: aiData.reply,
+            sender_id: receiverId!,
+            receiver_id: currentUserId,
+            created_at: new Date().toISOString(),
+            status: 'sent',
+            case_type: caseType
+          };
+          setTimeout(() => {
+            setMessages(prev => [...prev, aiReplyMsg]);
+          }, 1000);
+        } else if (aiError) {
+          console.error('AI auto-reply error:', aiError);
         }
       } catch (aiError) {
         console.error('AI auto-reply error:', aiError);
