@@ -490,23 +490,27 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
                 {msgs.map((msg) => {
                   const isOwn = msg.sender_id === currentUserId;
                   const isFileMessage = msg.content.includes('supabase') && msg.content.includes('storage');
-                  const isAiMessage = !isOwn && (msg.content.includes('— Sent by AI Assistant') || msg.content.includes('— Sent by AI'));
+                  const isAiMessage = !isOwn && (
+                    msg.content.includes('AI-generated response') || 
+                    msg.content.includes('— Sent by AI') ||
+                    msg.status === 'ai_sent'
+                  );
                   
                   return (
                     <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2`}>
-                      <div className={`max-w-[75%] ${isOwn ? 'order-1' : ''}`}>
-                        {/* AI Badge */}
+                      <div className={`max-w-[80%] ${isOwn ? 'order-1' : ''}`}>
+                        {/* AI Badge - Clear indicator */}
                         {isAiMessage && (
-                          <div className="flex items-center gap-1 mb-1">
-                            <Bot className="w-3 h-3 text-blue-500" />
-                            <span className="text-xs text-blue-500 font-medium">AI Assistant</span>
+                          <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 bg-blue-100 dark:bg-blue-900/40 rounded-full w-fit">
+                            <Bot className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Sent by AI</span>
                           </div>
                         )}
-                        <div className={`rounded-2xl px-4 py-2 ${
+                        <div className={`rounded-2xl px-4 py-3 ${
                           isOwn 
                             ? 'bg-primary text-primary-foreground rounded-br-md' 
                             : isAiMessage
-                              ? 'bg-blue-50 dark:bg-blue-950/30 text-foreground border border-blue-200 dark:border-blue-800 rounded-bl-md'
+                              ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 text-foreground border-2 border-blue-200 dark:border-blue-700 rounded-bl-md shadow-sm'
                               : 'bg-card text-foreground border border-border rounded-bl-md'
                         }`}>
                           {isFileMessage ? (
@@ -525,7 +529,7 @@ const LawyerChat = ({ lawyerId, onBack, caseType, userType = 'user', chatPartner
                               <span className="text-sm">{msg.content.replace('📎 ', '')}</span>
                             </div>
                           ) : (
-                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                           )}
                         </div>
                         <div className={`flex items-center gap-1 mt-1 ${isOwn ? 'justify-end' : ''}`}>
