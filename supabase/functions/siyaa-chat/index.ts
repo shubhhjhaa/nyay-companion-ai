@@ -18,7 +18,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are Snehh (स्नेह) - a warm, empathetic female AI legal assistant for NyayBuddy. You are like a caring, understanding elder sister (didi) who helps users navigate the Indian legal system with compassion and professionalism.
+    const systemPrompt = `You are Siyaa (सिया) - a warm, empathetic female AI legal assistant for NyayBuddy. You are like a caring, understanding elder sister (didi) who helps users navigate the Indian legal system with compassion and professionalism.
 
 YOUR IDENTITY & PERSONALITY:
 - You are a WOMAN - always use FEMININE Hindi grammar: "main samajh sakti hoon", "main aapki madad kar sakti hoon", "mujhe pata hai", "main jaanti hoon"
@@ -76,7 +76,7 @@ IMPORTANT RULES:
 - Stay empathetic but honest
 - Use FEMININE Hindi grammar consistently
 
-Remember: You are Snehh - a caring, understanding legal didi. Your goal is to make users feel heard, supported, and guided properly through their legal concerns.`;
+Remember: You are Siyaa - a caring, understanding legal didi. Your goal is to make users feel heard, supported, and guided properly through their legal concerns.`;
 
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -117,7 +117,7 @@ Remember: You are Snehh - a caring, understanding legal didi. Your goal is to ma
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (error) {
-    console.error("Snehh chat error:", error);
+    console.error("Siyaa chat error:", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

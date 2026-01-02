@@ -1,7 +1,7 @@
 import { Scale, ShieldCheck, MessageSquareText, Mail, Users, ArrowRight, Gavel, BookOpen, FileCheck, Award, CheckCircle, Star, Phone, Clock, Building2, AlertCircle, MapPin, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import snehhImage from "@/assets/snehh-chatbot.png";
+import siyaaImage from "@/assets/siyaa-chatbot.png";
 
 interface LandingPageProps {
   onAccountClick: () => void;
@@ -387,7 +387,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* Meet Snehh Section */}
+      {/* Meet Siyaa Section */}
       <section className="py-24 bg-gradient-to-br from-nyay-teal/5 via-background to-nyay-gold/5 relative overflow-hidden">
         <div className="absolute top-20 right-20 w-64 h-64 bg-nyay-gold/10 rounded-full blur-3xl" />
         <div className="absolute bottom-20 left-20 w-48 h-48 bg-nyay-teal/10 rounded-full blur-3xl" />
@@ -405,8 +405,8 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
                 {/* Image container */}
                 <div className="absolute inset-8 rounded-full overflow-hidden shadow-2xl ring-4 ring-nyay-gold/30">
                   <img 
-                    src={snehhImage} 
-                    alt="Snehh - Your AI Legal Companion" 
+                    src={siyaaImage} 
+                    alt="Siyaa - Your AI Legal Companion" 
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -433,11 +433,11 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
               </div>
               
               <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
-                Meet <span className="text-nyay-gold">Snehh</span>
+                Meet <span className="text-nyay-gold">Siyaa</span>
               </h2>
               
               <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                Snehh is your compassionate AI legal assistant who understands the emotional weight of legal troubles. She's here to listen, guide, and support you through every step of your legal journey.
+                Siyaa is your compassionate AI legal assistant who understands the emotional weight of legal troubles. She's here to listen, guide, and support you through every step of your legal journey.
               </p>
               
               <ul className="space-y-4 mb-8">
@@ -457,7 +457,7 @@ const LandingPage = ({ onAccountClick }: LandingPageProps) => {
               </ul>
               
               <Button variant="gold" size="lg" onClick={onAccountClick} className="group">
-                Chat with Snehh
+                Chat with Siyaa
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
