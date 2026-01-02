@@ -15,7 +15,7 @@ import Notifications from "@/components/dashboard/Notifications";
 import LegalDictionary from "@/components/dashboard/LegalDictionary";
 import PrivacySettings from "@/components/dashboard/PrivacySettings";
 import LawyerChat from "@/components/dashboard/LawyerChat";
-import SnehhChatbot from "@/components/dashboard/SnehhChatbot";
+import SiyaaChatbot from "@/components/dashboard/SiyaaChatbot";
 import DashboardSettings from "@/components/dashboard/DashboardSettings";
 import { DashboardProvider, useDashboard } from "@/contexts/DashboardContext";
 
@@ -278,8 +278,8 @@ const UserDashboardContent = () => {
         </p>
       </div>
 
-      {/* Snehh AI Chatbot */}
-      <SnehhChatbot />
+      {/* Siyaa AI Chatbot */}
+      <SiyaaChatbot />
     </div>
   );
 };
