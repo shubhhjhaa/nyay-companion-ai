@@ -4,21 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import snehhAvatar from "@/assets/snehh-avatar.png";
+import siyaaAvatar from "@/assets/siyaa-avatar.png";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/snehh-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/siyaa-chat`;
 
-const SnehhChatbot = () => {
+const SiyaaChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Namaste! 🙏 Main Snehh hoon, aapka legal assistant. Main aapki legal queries mein help kar sakta/sakti hoon - chahe wo app navigation ho, consumer rights ho, ya general legal guidance. Aap kaise madad chahte hain?",
+      content: "Namaste! 🙏 Main Siyaa hoon, aapki legal assistant. Main aapki legal queries mein help kar sakti hoon - chahe wo app navigation ho, consumer rights ho, ya general legal guidance. Aap kaise madad chahti hain?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -50,7 +50,7 @@ const SnehhChatbot = () => {
 
     if (!resp.ok) {
       const errorData = await resp.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to connect to Snehh");
+      throw new Error(errorData.error || "Failed to connect to Siyaa");
     }
 
     if (!resp.body) throw new Error("No response body");
@@ -164,7 +164,7 @@ const SnehhChatbot = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 z-50 group"
-        aria-label="Chat with Snehh"
+        aria-label="Chat with Siyaa"
       >
         <div className="relative">
           {isOpen ? (
@@ -173,8 +173,8 @@ const SnehhChatbot = () => {
             </div>
           ) : (
             <img 
-              src={snehhAvatar} 
-              alt="Snehh" 
+              src={siyaaAvatar} 
+              alt="Siyaa" 
               className="w-16 h-16 rounded-full object-cover shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ring-2 ring-nyay-gold/50" 
             />
           )}
@@ -183,7 +183,7 @@ const SnehhChatbot = () => {
           )}
           {!isOpen && (
             <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-card rounded-lg shadow-md border border-border opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              <span className="text-sm font-medium">Connect with Snehh</span>
+              <span className="text-sm font-medium">Connect with Siyaa</span>
               <Sparkles className="inline-block w-3 h-3 ml-1 text-nyay-gold" />
             </div>
           )}
@@ -195,9 +195,9 @@ const SnehhChatbot = () => {
         <Card className="fixed bottom-24 right-6 z-50 w-[380px] h-[520px] flex flex-col shadow-xl animate-scale-in overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-hero p-4 flex items-center gap-3">
-            <img src={snehhAvatar} alt="Snehh" className="w-10 h-10 rounded-full object-cover" />
+            <img src={siyaaAvatar} alt="Siyaa" className="w-10 h-10 rounded-full object-cover" />
             <div className="flex-1">
-              <h3 className="font-semibold text-primary-foreground">Snehh</h3>
+              <h3 className="font-semibold text-primary-foreground">Siyaa</h3>
               <p className="text-xs text-primary-foreground/80">Your AI Legal Assistant</p>
             </div>
             <Button
@@ -223,7 +223,7 @@ const SnehhChatbot = () => {
                       <User className="w-4 h-4 text-nyay-gold" />
                     </div>
                   ) : (
-                    <img src={snehhAvatar} alt="Snehh" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    <img src={siyaaAvatar} alt="Siyaa" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                   )}
                   <div
                     className={`max-w-[75%] p-3 rounded-2xl text-sm ${
@@ -238,7 +238,7 @@ const SnehhChatbot = () => {
               ))}
               {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex gap-2">
-                  <img src={snehhAvatar} alt="Snehh" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                  <img src={siyaaAvatar} alt="Siyaa" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
                   <div className="bg-muted p-3 rounded-2xl rounded-tl-sm">
                     <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                   </div>
@@ -271,7 +271,7 @@ const SnehhChatbot = () => {
           {/* Disclaimer */}
           <div className="px-4 py-2 bg-muted/50 border-t border-border">
             <p className="text-[10px] text-muted-foreground text-center">
-              Snehh is an AI assistant for guidance only and does not replace professional legal advice.
+              Siyaa is an AI assistant for guidance only and does not replace professional legal advice.
             </p>
           </div>
 
@@ -312,4 +312,4 @@ const SnehhChatbot = () => {
   );
 };
 
-export default SnehhChatbot;
+export default SiyaaChatbot;
